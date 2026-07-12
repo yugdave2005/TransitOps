@@ -1,16 +1,29 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import StatusBadge from '../common/StatusBadge';
 import Button from '../common/Button';
 import { Truck, Users, Fuel, Gauge, Compass, X, ShieldCheck, Wrench, AlertCircle, Navigation } from 'lucide-react';
 
 export default function VehicleDetailDrawer({ vehicle, onClose, onQuickAction }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      L.DomEvent.disableClickPropagation(containerRef.current);
+      L.DomEvent.disableScrollPropagation(containerRef.current);
+    }
+  }, [vehicle]);
+
   if (!vehicle) return null;
 
   const isMoving = vehicle.status === 'ON_TRIP' && vehicle.speed > 0;
   const fuelColor = vehicle.fuel < 20 ? 'bg-status-red' : vehicle.fuel < 45 ? 'bg-status-orange' : 'bg-status-green';
 
   return (
-    <div className="absolute top-4 right-4 z-[1000] w-80 bg-background-panel border border-border shadow-2xl rounded-sm overflow-hidden flex flex-col animate-slideLeft">
+    <div 
+      ref={containerRef}
+      className="absolute top-4 right-4 z-[1000] w-80 bg-background-panel border border-border shadow-2xl rounded-sm overflow-hidden flex flex-col animate-slideLeft"
+    >
       {/* Header */}
       <div className="bg-primary text-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2 min-w-0">
@@ -80,7 +93,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose, onQuickAction })
           <div className="flex items-center justify-between">
             <span>Route Corridor:</span>
             <span className="font-semibold text-primary truncate max-w-[150px]">
-              {vehicle.routeKey ? vehicle.routeKey.replace('_', ' ➔ ') : 'In Depot'}
+              {vehicle.status === 'ON_TRIP' && vehicle.routeKey ? vehicle.routeKey.replace('_', ' ➔ ') : vehicle.status === 'IN_SHOP' ? 'In Maintenance' : 'In Depot'}
             </span>
           </div>
           <div className="flex items-center justify-between">

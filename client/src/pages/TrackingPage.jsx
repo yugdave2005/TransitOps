@@ -17,7 +17,7 @@ export default function TrackingPage() {
   const [telemetryList, setTelemetryList] = useState([]);
   const [isSimulatorRunning, setIsSimulatorRunning] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [toggling, setToggling] = useState(false);
@@ -27,18 +27,12 @@ export default function TrackingPage() {
       const res = await api.get('/tracking/live');
       setTelemetryList(res.data.telemetry || []);
       setIsSimulatorRunning(res.data.isRunning);
-
-      // Keep selected vehicle synced with latest GPS data if open
-      if (selectedVehicle) {
-        const updated = (res.data.telemetry || []).find(v => (v.vehicleId === selectedVehicle.vehicleId || v.id === selectedVehicle.id));
-        if (updated) setSelectedVehicle(updated);
-      }
     } catch (err) {
       console.error('Failed to fetch live telemetry:', err);
     } finally {
       setLoading(false);
     }
-  }, [selectedVehicle]);
+  }, []);
 
   useEffect(() => {
     fetchLiveTelemetry();
@@ -49,15 +43,11 @@ export default function TrackingPage() {
     const unsub = subscribe('vehicle:telemetry', ({ telemetry }) => {
       if (Array.isArray(telemetry)) {
         setTelemetryList(telemetry);
-        if (selectedVehicle) {
-          const updated = telemetry.find(v => (v.vehicleId === selectedVehicle.vehicleId || v.id === selectedVehicle.id));
-          if (updated) setSelectedVehicle(updated);
-        }
       }
     });
 
     return () => unsub();
-  }, [subscribe, selectedVehicle]);
+  }, [subscribe]);
 
   const handleToggleSimulator = async () => {
     setToggling(true);
@@ -90,9 +80,6 @@ export default function TrackingPage() {
         message: `Vehicle transitioned to ${newStatus}.`
       });
       fetchLiveTelemetry();
-      if (selectedVehicle) {
-        setSelectedVehicle(prev => ({ ...prev, status: newStatus }));
-      }
     } catch (err) {
       showToast({
         type: 'error',
@@ -116,6 +103,7 @@ export default function TrackingPage() {
     ? Math.round(telemetryList.filter(v => v.status === 'ON_TRIP').reduce((acc, curr) => acc + (curr.speed || 0), 0) / activeEnRoute)
     : 0;
 
+  const selectedVehicle = telemetryList.find(v => v.vehicleId === selectedVehicleId || v.id === selectedVehicleId) || null;
   const canManage = hasRole('FLEET_MANAGER', 'SAFETY_OFFICER');
 
   return (
@@ -208,12 +196,12 @@ export default function TrackingPage() {
             <FleetMap
               vehicles={filteredVehicles}
               selectedVehicle={selectedVehicle}
-              onSelectVehicle={setSelectedVehicle}
+              onSelectVehicle={(v) => setSelectedVehicleId(v ? (v.vehicleId || v.id) : null)}
             />
 
             <VehicleDetailDrawer
               vehicle={selectedVehicle}
-              onClose={() => setSelectedVehicle(null)}
+              onClose={() => setSelectedVehicleId(null)}
               onQuickAction={canManage ? handleQuickAction : null}
             />
           </>
