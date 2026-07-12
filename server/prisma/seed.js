@@ -5,74 +5,65 @@ const prisma = new PrismaClient();
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
-/** Random integer between min (inclusive) and max (inclusive) */
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Random float between min and max, rounded to 'decimals' places */
 function randFloat(min, max, decimals = 2) {
   return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
 }
 
-/** Pick a random element from an array */
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/** Generate a date in the past N days from a reference date */
 function daysAgo(days, fromDate = new Date()) {
   return new Date(fromDate.getTime() - days * 24 * 3600 * 1000);
 }
 
-/** Generate a random date between two dates */
-function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
+// ─── Gujarat-Only Data Pools ────────────────────────────────────────────────────
 
-// ─── Realistic Data Pools ───────────────────────────────────────────────────────
-
-const INDIAN_CITIES = [
-  { name: 'New Delhi', lat: 28.6139, lng: 77.2090, region: 'North' },
-  { name: 'Mumbai', lat: 19.0760, lng: 72.8777, region: 'West' },
-  { name: 'Bangalore', lat: 12.9716, lng: 77.5946, region: 'South' },
-  { name: 'Chennai', lat: 13.0827, lng: 80.2707, region: 'South' },
-  { name: 'Kolkata', lat: 22.5726, lng: 88.3639, region: 'East' },
-  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, region: 'South' },
-  { name: 'Pune', lat: 18.5204, lng: 73.8567, region: 'West' },
-  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714, region: 'West' },
-  { name: 'Jaipur', lat: 26.9124, lng: 75.7873, region: 'North' },
-  { name: 'Lucknow', lat: 26.8467, lng: 80.9462, region: 'North' },
-  { name: 'Chandigarh', lat: 30.7333, lng: 76.7794, region: 'North' },
-  { name: 'Nagpur', lat: 21.1458, lng: 79.0882, region: 'West' },
-  { name: 'Coimbatore', lat: 11.0168, lng: 76.9558, region: 'South' },
-  { name: 'Indore', lat: 22.7196, lng: 75.8577, region: 'West' },
-  { name: 'Patna', lat: 25.6093, lng: 85.1376, region: 'East' },
-  { name: 'Kochi', lat: 9.9312, lng: 76.2673, region: 'South' },
-  { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, region: 'East' },
-  { name: 'Bhopal', lat: 23.2599, lng: 77.4126, region: 'West' },
-  { name: 'Guwahati', lat: 26.1445, lng: 91.7362, region: 'East' },
-  { name: 'Thiruvananthapuram', lat: 8.5241, lng: 76.9366, region: 'South' },
-  { name: 'Mysore', lat: 12.2958, lng: 76.6394, region: 'South' },
-  { name: 'Surat', lat: 21.1702, lng: 72.8311, region: 'West' },
-  { name: 'Vadodara', lat: 22.3072, lng: 73.1812, region: 'West' },
-  { name: 'Dehradun', lat: 30.3165, lng: 78.0322, region: 'North' },
-  { name: 'Ranchi', lat: 23.3441, lng: 85.3096, region: 'East' },
+const GUJARAT_CITIES = [
+  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714 },
+  { name: 'Surat', lat: 21.1702, lng: 72.8311 },
+  { name: 'Vadodara', lat: 22.3072, lng: 73.1812 },
+  { name: 'Rajkot', lat: 22.3039, lng: 70.8022 },
+  { name: 'Gandhinagar', lat: 23.2156, lng: 72.6369 },
+  { name: 'Bhavnagar', lat: 21.7645, lng: 72.1519 },
+  { name: 'Jamnagar', lat: 22.4707, lng: 70.0577 },
+  { name: 'Junagadh', lat: 21.5222, lng: 70.4579 },
+  { name: 'Anand', lat: 22.5645, lng: 72.9289 },
+  { name: 'Morbi', lat: 22.8173, lng: 70.8370 },
+  { name: 'Nadiad', lat: 22.6916, lng: 72.8634 },
+  { name: 'Mehsana', lat: 23.5880, lng: 72.3693 },
+  { name: 'Bharuch', lat: 21.6944, lng: 72.9958 },
+  { name: 'Porbandar', lat: 21.6417, lng: 69.6293 },
+  { name: 'Valsad', lat: 20.5992, lng: 72.9342 },
+  { name: 'Navsari', lat: 20.9467, lng: 72.9520 },
+  { name: 'Kutch (Bhuj)', lat: 23.2420, lng: 69.6669 },
+  { name: 'Surendranagar', lat: 22.7272, lng: 71.6480 },
+  { name: 'Dahod', lat: 22.8364, lng: 74.2545 },
+  { name: 'Palanpur', lat: 24.1725, lng: 72.4381 },
 ];
 
 const LOCATION_SUFFIXES = [
-  'Hub', 'Logistics Center', 'Port', 'Warehouse', 'Industrial Area',
-  'Distribution Center', 'Depot', 'Terminal', 'Freight Yard', 'Storage Complex',
-  'Container Yard', 'Loading Point', 'Transit Hub', 'Cargo Terminal',
+  'Hub', 'Logistics Center', 'Warehouse', 'Industrial Area',
+  'Distribution Center', 'Depot', 'Terminal', 'Freight Yard',
+  'Container Yard', 'Loading Point', 'Transit Hub', 'GIDC',
+  'SEZ', 'Cargo Terminal', 'Storage Complex',
 ];
 
 const FUEL_STATIONS = [
-  'Indian Oil Highway Station', 'Bharat Petroleum Depot', 'Hindustan Petroleum Center',
-  'Reliance Fuel Stop', 'Shell Express', 'Essar Fuel Station', 'HP Petrol Pump',
-  'IOCL Highway Point', 'BPCL Truck Fueling Center', 'Nayara Energy Hub',
-  'Total Energies Service Station', 'GAIL Gas Station', 'Adani Gas Point',
-  'City Fuel Station', 'Metro Fuels', 'Quick Fill Station', 'Highway Fuel Center',
-  'National Fuel Stop', 'Express Petroleum', 'Greenway Fuel Station',
+  'Indian Oil - Ahmedabad Highway', 'Bharat Petroleum - SG Highway',
+  'Hindustan Petroleum - Vadodara', 'Reliance Fuel Stop - Surat',
+  'Shell Express - Gandhinagar', 'Essar Fuel - Rajkot',
+  'HP Petrol Pump - Anand', 'IOCL Highway Point - Bharuch',
+  'BPCL Truck Fueling - Morbi', 'Nayara Energy - Jamnagar',
+  'Adani Gas Station - Mundra', 'City Fuel - Bhavnagar',
+  'National Fuel Stop - Mehsana', 'Express Petroleum - Junagadh',
+  'Highway Fuel Center - Navsari', 'Quick Fill - Nadiad',
+  'Metro Fuels - Valsad', 'Greenway Fuel - Palanpur',
+  'Gujarat Petro - Kutch Highway', 'GSPC Gas Station - Dahod',
 ];
 
 const MAINTENANCE_DESCRIPTIONS = [
@@ -108,44 +99,77 @@ const MAINTENANCE_DESCRIPTIONS = [
   'Catalytic converter replacement',
 ];
 
-const EXPENSE_DESCRIPTIONS = {
-  TOLL: [
-    'NH-48 Fastag toll charges', 'Mumbai-Pune Expressway toll',
-    'Yamuna Expressway toll', 'NH-44 tolls (Hyderabad-Bangalore)',
-    'Bangalore-Mysore Expressway toll', 'Delhi-Jaipur NH-8 toll',
-    'Agra-Lucknow Expressway toll', 'Kolkata-Durgapur Expressway toll',
-    'Chennai-Salem NH toll', 'NH-66 coastal highway toll',
-    'Ahmedabad-Vadodara Expressway toll', 'Eastern Peripheral Expressway toll',
-  ],
-  PARKING: [
-    'Overnight parking at truck terminal', 'Warehouse parking fee',
-    'City logistics zone parking', 'Port area parking charges',
-    'Secured parking at highway rest stop', 'Airport cargo zone parking',
-    'Industrial estate parking', 'Multi-level parking at distribution center',
-  ],
-  REPAIR: [
-    'Emergency tyre puncture repair', 'Roadside windshield crack repair',
-    'Hydraulic hose replacement (emergency)', 'Tail light assembly replacement',
-    'Side mirror replacement after collision', 'Door lock mechanism repair',
-    'Fuel line leak repair', 'Wiper motor replacement',
-    'Horn and indicator relay replacement', 'Emergency fan belt replacement',
-  ],
-  INSURANCE: [
-    'Annual comprehensive vehicle insurance premium',
-    'Third-party liability insurance renewal',
-    'Goods-in-transit insurance premium',
-    'Motor vehicle accident damage claim deductible',
-    'Fleet insurance bundle renewal (quarterly)',
-    'Driver personal accident insurance',
-  ],
-  OTHER: [
-    'Driver food and accommodation allowance', 'Vehicle cleaning and wash',
-    'GPS tracking device maintenance', 'Fitness certificate renewal fee',
-    'Pollution Under Control (PUC) certificate', 'Road tax renewal',
-    'Permit fee for state border crossing', 'Weighbridge charges',
-    'Loading/unloading labor charges', 'Documentation and challan fees',
-    'Vehicle registration renewal', 'Driver uniform and safety gear',
-  ],
+// ─── Expense descriptions — uses [Cat: CATEGORY] prefix for the dashboard ─────
+// Dashboard categories: TOLL, MAINTENANCE, FUEL, SALARY, INSURANCE, OTHER
+// DB enum only has: TOLL, PARKING, REPAIR, INSURANCE, OTHER
+// So we embed the REAL category in the description via [Cat: X] prefix
+
+const EXPENSE_TEMPLATES = {
+  TOLL: {
+    dbCategory: 'TOLL', // direct map
+    descriptions: [
+      'Ahmedabad-Vadodara Expressway toll', 'NH-48 Fastag charges',
+      'Rajkot-Jamnagar highway toll', 'Surat-Bharuch NH toll',
+      'Gandhinagar Ring Road toll', 'Bhavnagar-Rajkot toll',
+      'Kutch-Ahmedabad highway toll', 'Morbi-Rajkot expressway toll',
+      'Mehsana-Palanpur NH toll', 'Vadodara-Surat expressway toll',
+      'Navsari-Valsad coastal highway toll', 'Anand-Nadiad bypass toll',
+    ],
+    amountRange: [150, 4500],
+  },
+  MAINTENANCE: {
+    dbCategory: 'REPAIR', // maps to REPAIR in DB
+    descriptions: [
+      'Scheduled engine service at Tata workshop', 'Brake system overhaul',
+      'Transmission repair at Ahmedabad garage', 'Suspension work at Surat center',
+      'AC compressor replacement', 'Clutch assembly repair',
+      'Steering rack replacement', 'Exhaust system repair',
+      'Electrical wiring fix', 'Radiator replacement and flush',
+    ],
+    amountRange: [3000, 45000],
+  },
+  FUEL: {
+    dbCategory: 'OTHER', // maps to OTHER in DB
+    descriptions: [
+      'Diesel refill — Ahmedabad depot', 'Fuel top-up — Surat highway',
+      'Emergency fuel — Kutch route', 'Diesel — Vadodara GIDC trip',
+      'Fuel refill — Rajkot transit', 'Diesel — Gandhinagar depot',
+      'Fuel — Jamnagar port run', 'Diesel top-up — Bharuch',
+      'Fuel — Morbi ceramics delivery', 'Diesel — Bhavnagar port route',
+    ],
+    amountRange: [2000, 25000],
+  },
+  SALARY: {
+    dbCategory: 'OTHER', // maps to OTHER in DB
+    descriptions: [
+      'Driver daily wage — local delivery', 'Driver allowance — long-haul trip',
+      'Helper wages — loading/unloading', 'Overtime pay — night shift',
+      'Driver bonus — safe delivery', 'Cleaner wages — vehicle wash duty',
+      'Relief driver wages', 'Driver food and stay allowance',
+    ],
+    amountRange: [500, 8000],
+  },
+  INSURANCE: {
+    dbCategory: 'INSURANCE', // direct map
+    descriptions: [
+      'Annual comprehensive vehicle insurance', 'Third-party liability insurance renewal',
+      'Goods-in-transit insurance premium', 'Fleet insurance bundle (quarterly)',
+      'Driver personal accident insurance', 'Motor accident claim deductible',
+    ],
+    amountRange: [15000, 85000],
+  },
+  OTHER: {
+    dbCategory: 'OTHER', // direct map
+    descriptions: [
+      'Vehicle cleaning and wash', 'GPS tracker maintenance fee',
+      'Fitness certificate renewal', 'PUC certificate fee',
+      'Road tax renewal', 'State border permit fee',
+      'Weighbridge charges', 'Loading/unloading labor',
+      'Documentation and challan fees', 'Parking charges',
+      'Vehicle registration renewal', 'Driver safety gear',
+    ],
+    amountRange: [200, 12000],
+  },
 };
 
 const VEHICLE_NAMES = {
@@ -176,10 +200,10 @@ const VEHICLE_NAMES = {
   ],
 };
 
-const INDIAN_STATES_RTO = [
-  'KA', 'DL', 'MH', 'TN', 'KL', 'AP', 'TS', 'GJ', 'RJ', 'UP',
-  'WB', 'MP', 'HR', 'PB', 'BR', 'OR', 'AS', 'JH', 'UK', 'GA',
-];
+const GJ_RTOS = ['GJ-01', 'GJ-02', 'GJ-03', 'GJ-04', 'GJ-05', 'GJ-06',
+  'GJ-07', 'GJ-08', 'GJ-09', 'GJ-10', 'GJ-11', 'GJ-12',
+  'GJ-13', 'GJ-14', 'GJ-15', 'GJ-16', 'GJ-17', 'GJ-18',
+  'GJ-19', 'GJ-20', 'GJ-21', 'GJ-22', 'GJ-23', 'GJ-24', 'GJ-25', 'GJ-27'];
 
 const FIRST_NAMES = [
   'Rajesh', 'Vikram', 'Suresh', 'Manoj', 'Priya', 'Anita', 'Kiran',
@@ -190,10 +214,10 @@ const FIRST_NAMES = [
 ];
 
 const LAST_NAMES = [
-  'Kumar', 'Sharma', 'Verma', 'Singh', 'Patil', 'Gupta', 'Mehta',
-  'Reddy', 'Nair', 'Tiwari', 'Mishra', 'Yadav', 'Joshi', 'Pillai',
-  'Chauhan', 'Desai', 'Rao', 'Malhotra', 'Agarwal', 'Pandey',
-  'Iyer', 'Kulkarni', 'Menon', 'Bhat', 'Das',
+  'Patel', 'Shah', 'Mehta', 'Desai', 'Joshi', 'Trivedi', 'Bhatt',
+  'Pandya', 'Parmar', 'Solanki', 'Raval', 'Modi', 'Chauhan', 'Thakkar',
+  'Gajjar', 'Dave', 'Vyas', 'Rana', 'Makwana', 'Suthar',
+  'Chaudhary', 'Darji', 'Nagar', 'Barot', 'Soni',
 ];
 
 const LICENSE_CATEGORIES = [
@@ -205,11 +229,10 @@ const LICENSE_CATEGORIES = [
 
 async function main() {
   console.log('╔══════════════════════════════════════════════════════════════╗');
-  console.log('║       TransitOps — Comprehensive Database Seeding          ║');
-  console.log('╚══════════════════════════════════════════════════════════════╝');
-  console.log();
+  console.log('║     TransitOps — Gujarat Fleet Database Seeding            ║');
+  console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
-  // Clean up existing data in reverse relation order
+  // Clean up
   console.log('[1/8] Clearing existing data...');
   await prisma.telemetryLog.deleteMany();
   await prisma.expense.deleteMany();
@@ -221,38 +244,37 @@ async function main() {
   await prisma.user.deleteMany();
   console.log('  ✔ All existing records removed.\n');
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 1. USERS (10 users across all 4 roles)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 1. USERS (10)
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[2/8] Seeding Users...');
   const passwordHash = await bcrypt.hash('Password123!', 10);
 
   const usersData = [
     { email: 'fleet_mgr@transitops.com', name: 'Vikram Mehta', role: 'FLEET_MANAGER' },
     { email: 'fleet_mgr2@transitops.com', name: 'Anita Desai', role: 'FLEET_MANAGER' },
-    { email: 'driver1@transitops.com', name: 'Alex Kumar', role: 'DRIVER' },
-    { email: 'driver2@transitops.com', name: 'Suresh Patil', role: 'DRIVER' },
-    { email: 'driver3@transitops.com', name: 'Manoj Tiwari', role: 'DRIVER' },
-    { email: 'safety@transitops.com', name: 'Priya Sharma', role: 'SAFETY_OFFICER' },
+    { email: 'driver1@transitops.com', name: 'Rajesh Patel', role: 'DRIVER' },
+    { email: 'driver2@transitops.com', name: 'Suresh Parmar', role: 'DRIVER' },
+    { email: 'driver3@transitops.com', name: 'Manoj Solanki', role: 'DRIVER' },
+    { email: 'safety@transitops.com', name: 'Priya Trivedi', role: 'SAFETY_OFFICER' },
     { email: 'safety2@transitops.com', name: 'Ravi Chauhan', role: 'SAFETY_OFFICER' },
-    { email: 'analyst@transitops.com', name: 'Rohan Gupta', role: 'FINANCIAL_ANALYST' },
-    { email: 'analyst2@transitops.com', name: 'Neha Agarwal', role: 'FINANCIAL_ANALYST' },
-    { email: 'admin@transitops.com', name: 'Sanjay Malhotra', role: 'FLEET_MANAGER' },
+    { email: 'analyst@transitops.com', name: 'Rohan Joshi', role: 'FINANCIAL_ANALYST' },
+    { email: 'analyst2@transitops.com', name: 'Neha Shah', role: 'FINANCIAL_ANALYST' },
+    { email: 'admin@transitops.com', name: 'Sanjay Bhatt', role: 'FLEET_MANAGER' },
   ];
 
   const users = [];
   for (const u of usersData) {
-    const user = await prisma.user.create({
+    users.push(await prisma.user.create({
       data: { email: u.email, passwordHash, name: u.name, role: u.role },
-    });
-    users.push(user);
+    }));
   }
-  console.log(`  ✔ Created ${users.length} users (password for all: Password123!)\n`);
+  console.log(`  ✔ Created ${users.length} users (password: Password123!)\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 2. VEHICLES (25 vehicles — mix of types, statuses, regions)
-  // ────────────────────────────────────────────────────────────────────────────
-  console.log('[3/8] Seeding Vehicles...');
+  // ──────────────────────────────────────────────────────────────────────────
+  // 2. VEHICLES (25 — all Gujarat, region: West)
+  // ──────────────────────────────────────────────────────────────────────────
+  console.log('[3/8] Seeding Vehicles (Gujarat only)...');
 
   const vehicleSpecs = [
     // TRUCKS (10)
@@ -293,11 +315,10 @@ async function main() {
   function generateRegNo() {
     let reg;
     do {
-      const state = pick(INDIAN_STATES_RTO);
-      const district = String(randInt(1, 50)).padStart(2, '0');
+      const rto = pick(GJ_RTOS);
       const letters = String.fromCharCode(65 + randInt(0, 25)) + String.fromCharCode(65 + randInt(0, 25));
       const num = String(randInt(1000, 9999));
-      reg = `${state}-${district}-${letters}-${num}`;
+      reg = `${rto}-${letters}-${num}`;
     } while (usedRegNos.has(reg));
     usedRegNos.add(reg);
     return reg;
@@ -306,34 +327,32 @@ async function main() {
   const vehicles = [];
   for (let i = 0; i < vehicleSpecs.length; i++) {
     const spec = vehicleSpecs[i];
-    const city = pick(INDIAN_CITIES);
+    const city = pick(GUJARAT_CITIES);
     const status = pick(vehicleStatuses);
-    const namePool = VEHICLE_NAMES[spec.type];
-    const vName = pick(namePool);
 
     const vehicle = await prisma.vehicle.create({
       data: {
         registrationNo: generateRegNo(),
-        name: vName,
+        name: pick(VEHICLE_NAMES[spec.type]),
         type: spec.type,
         maxLoadCapacity: spec.maxLoad,
         odometer: randInt(spec.odomRange[0], spec.odomRange[1]),
         acquisitionCost: randInt(spec.costRange[0], spec.costRange[1]),
         status,
-        region: city.region,
-        currentLat: status !== 'RETIRED' ? city.lat + randFloat(-0.05, 0.05) : null,
-        currentLng: status !== 'RETIRED' ? city.lng + randFloat(-0.05, 0.05) : null,
+        region: 'West',
+        currentLat: status !== 'RETIRED' ? city.lat + randFloat(-0.02, 0.02) : null,
+        currentLng: status !== 'RETIRED' ? city.lng + randFloat(-0.02, 0.02) : null,
       },
     });
     vehicles.push(vehicle);
   }
 
   const activeVehicles = vehicles.filter(v => v.status !== 'RETIRED');
-  console.log(`  ✔ Created ${vehicles.length} vehicles (${activeVehicles.length} active, ${vehicles.length - activeVehicles.length} retired)\n`);
+  console.log(`  ✔ Created ${vehicles.length} vehicles (${activeVehicles.length} active, all Gujarat)\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 3. DRIVERS (20 drivers — varied statuses, license types, safety scores)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 3. DRIVERS (20 — Gujarati names)
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[4/8] Seeding Drivers...');
 
   const usedLicenses = new Set();
@@ -342,10 +361,9 @@ async function main() {
   function generateLicense() {
     let lic;
     do {
-      const state = pick(INDIAN_STATES_RTO);
-      const year = randInt(2010, 2022);
+      const year = randInt(2012, 2023);
       const num = String(randInt(1000000, 9999999));
-      lic = `${state}-${year}-${num}`;
+      lic = `GJ-${year}-${num}`;
     } while (usedLicenses.has(lic));
     usedLicenses.add(lic);
     return lic;
@@ -367,20 +385,16 @@ async function main() {
 
   const drivers = [];
   for (let i = 0; i < 20; i++) {
-    const isExpiredLicense = i === 18; // One driver with expired license
-    const isSuspended = i === 19;     // One driver suspended
-    const licExpiry = isExpiredLicense
+    const isExpired = i === 18;
+    const isSuspended = i === 19;
+    const licExpiry = isExpired
       ? new Date('2023-06-15')
       : new Date(`${randInt(2027, 2031)}-${String(randInt(1, 12)).padStart(2, '0')}-${String(randInt(1, 28)).padStart(2, '0')}`);
 
-    const status = isSuspended ? 'SUSPENDED' : isExpiredLicense ? 'OFF_DUTY' : pick(driverStatuses);
-    const safetyScore = isSuspended
-      ? randFloat(30, 55)
-      : isExpiredLicense
-        ? randFloat(60, 75)
-        : randFloat(72, 100);
+    const status = isSuspended ? 'SUSPENDED' : isExpired ? 'OFF_DUTY' : pick(driverStatuses);
+    const safetyScore = isSuspended ? randFloat(30, 55) : isExpired ? randFloat(60, 75) : randFloat(72, 100);
 
-    const driver = await prisma.driver.create({
+    drivers.push(await prisma.driver.create({
       data: {
         name: generateDriverName(),
         licenseNumber: generateLicense(),
@@ -390,16 +404,15 @@ async function main() {
         safetyScore,
         status,
       },
-    });
-    drivers.push(driver);
+    }));
   }
 
   const availableDrivers = drivers.filter(d => d.status === 'AVAILABLE');
-  console.log(`  ✔ Created ${drivers.length} drivers (${availableDrivers.length} available, 1 expired license, 1 suspended)\n`);
+  console.log(`  ✔ Created ${drivers.length} drivers (${availableDrivers.length} available)\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 4. TRIPS (120 trips over 6 months — realistic Indian routes)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 4. TRIPS (120 — Gujarat-to-Gujarat routes over 6 months)
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[5/8] Seeding Trips...');
 
   const tripStatusWeights = [
@@ -415,29 +428,24 @@ async function main() {
   const now = Date.now();
 
   for (let i = 0; i < 120; i++) {
-    // Pick two different cities
     let srcCity, destCity;
     do {
-      srcCity = pick(INDIAN_CITIES);
-      destCity = pick(INDIAN_CITIES);
+      srcCity = pick(GUJARAT_CITIES);
+      destCity = pick(GUJARAT_CITIES);
     } while (srcCity.name === destCity.name);
 
     const vehicle = pick(activeVehicles);
     const driver = pick(drivers.filter(d => d.status !== 'SUSPENDED'));
-
     const status = pick(tripStatusWeights);
-    const plannedDistance = randFloat(50, 2200, 0);
-    const cargoWeight = vehicle.type === 'MOTORCYCLE'
-      ? randFloat(5, 40, 1)
-      : vehicle.type === 'CAR'
-        ? randFloat(50, 450, 0)
-        : vehicle.type === 'VAN'
-          ? randFloat(200, vehicle.maxLoadCapacity * 0.95, 0)
+    const plannedDistance = randFloat(30, 650, 0);
+
+    const cargoWeight = vehicle.type === 'MOTORCYCLE' ? randFloat(5, 40, 1)
+      : vehicle.type === 'CAR' ? randFloat(50, 450, 0)
+        : vehicle.type === 'VAN' ? randFloat(200, vehicle.maxLoadCapacity * 0.95, 0)
           : randFloat(2000, vehicle.maxLoadCapacity * 0.95, 0);
 
-    // Time ranges based on status
     let createdAt, dispatchedAt, completedAt, cancelledAt;
-    const tripAge = randInt(0, 180); // up to 6 months ago
+    const tripAge = randInt(0, 180);
 
     if (status === 'COMPLETED') {
       createdAt = daysAgo(tripAge + randInt(1, 3));
@@ -450,24 +458,18 @@ async function main() {
       createdAt = daysAgo(tripAge + randInt(1, 5));
       cancelledAt = daysAgo(tripAge);
     } else {
-      // DRAFT
       createdAt = daysAgo(randInt(0, 7));
     }
 
     const isDelayed = status === 'COMPLETED' ? Math.random() < 0.2 : false;
     const actualDistance = status === 'COMPLETED' ? plannedDistance + randFloat(-15, 40, 1) : null;
     const fuelConsumed = status === 'COMPLETED' ? randFloat(actualDistance * 0.04, actualDistance * 0.12, 1) : null;
-    const revenue = (status === 'COMPLETED' || status === 'IN_PROGRESS')
-      ? randFloat(5000, 250000, 0)
-      : null;
+    const revenue = (status === 'COMPLETED' || status === 'IN_PROGRESS') ? randFloat(5000, 250000, 0) : null;
 
-    const srcSuffix = pick(LOCATION_SUFFIXES);
-    const destSuffix = pick(LOCATION_SUFFIXES);
-
-    const trip = await prisma.trip.create({
+    tripsData.push(await prisma.trip.create({
       data: {
-        source: `${srcCity.name} ${srcSuffix}`,
-        destination: `${destCity.name} ${destSuffix}`,
+        source: `${srcCity.name} ${pick(LOCATION_SUFFIXES)}`,
+        destination: `${destCity.name} ${pick(LOCATION_SUFFIXES)}`,
         cargoWeight,
         plannedDistance,
         actualDistance,
@@ -475,10 +477,10 @@ async function main() {
         revenue,
         status,
         isDelayed,
-        sourceLat: srcCity.lat + randFloat(-0.03, 0.03),
-        sourceLng: srcCity.lng + randFloat(-0.03, 0.03),
-        destLat: destCity.lat + randFloat(-0.03, 0.03),
-        destLng: destCity.lng + randFloat(-0.03, 0.03),
+        sourceLat: srcCity.lat + randFloat(-0.02, 0.02),
+        sourceLng: srcCity.lng + randFloat(-0.02, 0.02),
+        destLat: destCity.lat + randFloat(-0.02, 0.02),
+        destLng: destCity.lng + randFloat(-0.02, 0.02),
         vehicleId: vehicle.id,
         driverId: driver.id,
         dispatchedAt: dispatchedAt || null,
@@ -486,17 +488,16 @@ async function main() {
         cancelledAt: cancelledAt || null,
         createdAt,
       },
-    });
-    tripsData.push(trip);
+    }));
   }
 
   const completedTrips = tripsData.filter(t => t.status === 'COMPLETED').length;
   const activeTrips = tripsData.filter(t => ['IN_PROGRESS', 'DISPATCHED'].includes(t.status)).length;
-  console.log(`  ✔ Created ${tripsData.length} trips (${completedTrips} completed, ${activeTrips} active, rest draft/cancelled)\n`);
+  console.log(`  ✔ Created ${tripsData.length} trips (${completedTrips} completed, ${activeTrips} active)\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 5. MAINTENANCE LOGS (60 logs over 6 months)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 5. MAINTENANCE LOGS (60 over 6 months)
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[6/8] Seeding Maintenance Logs...');
 
   const maintenanceStatusWeights = [
@@ -504,22 +505,21 @@ async function main() {
     'CLOSED', 'CLOSED', 'IN_PROGRESS', 'IN_PROGRESS', 'OPEN',
   ];
 
-  const maintenanceLogs = [];
+  let maintenanceCount = 0;
   for (let i = 0; i < 60; i++) {
     const vehicle = pick(vehicles);
     const status = pick(maintenanceStatusWeights);
     const daysBack = randInt(0, 180);
     const scheduledDate = daysAgo(daysBack);
-    const completedDate = status === 'CLOSED' ? daysAgo(daysBack - randInt(1, 5)) : null;
+    const completedDate = status === 'CLOSED' ? daysAgo(Math.max(0, daysBack - randInt(1, 5))) : null;
 
-    // Cost varies by vehicle type and repair type
     const baseCost = vehicle.type === 'TRUCK' ? randInt(3000, 85000)
       : vehicle.type === 'BUS' ? randInt(5000, 120000)
         : vehicle.type === 'VAN' ? randInt(1500, 35000)
           : vehicle.type === 'CAR' ? randInt(1000, 25000)
             : randInt(500, 8000);
 
-    const log = await prisma.maintenanceLog.create({
+    await prisma.maintenanceLog.create({
       data: {
         description: pick(MAINTENANCE_DESCRIPTIONS),
         cost: baseCost,
@@ -529,170 +529,227 @@ async function main() {
         vehicleId: vehicle.id,
       },
     });
-    maintenanceLogs.push(log);
+    maintenanceCount++;
   }
+  console.log(`  ✔ Created ${maintenanceCount} maintenance logs\n`);
 
-  console.log(`  ✔ Created ${maintenanceLogs.length} maintenance logs\n`);
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // 6. FUEL LOGS (200 logs over 6 months)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 6. FUEL LOGS (200 — EVENLY spread across last 14 days + older)
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[7/8] Seeding Fuel Logs...');
 
-  const fuelLogs = [];
-  for (let i = 0; i < 200; i++) {
+  let fuelCount = 0;
+
+  // Ensure every day in the last 14 days has fuel logs
+  for (let day = 0; day < 14; day++) {
+    const logsPerDay = randInt(4, 8);
+    for (let j = 0; j < logsPerDay; j++) {
+      const vehicle = pick(activeVehicles);
+      const driver = Math.random() > 0.15 ? pick(drivers.filter(d => d.status !== 'SUSPENDED')) : null;
+
+      const liters = vehicle.type === 'TRUCK' ? randFloat(80, 300, 1)
+        : vehicle.type === 'BUS' ? randFloat(60, 250, 1)
+          : vehicle.type === 'VAN' ? randFloat(20, 80, 1)
+            : vehicle.type === 'CAR' ? randFloat(15, 55, 1)
+              : randFloat(3, 15, 1);
+
+      const costPerLiter = vehicle.type === 'MOTORCYCLE' ? randFloat(96, 108, 2) : randFloat(87, 98, 2);
+      const totalCost = parseFloat((liters * costPerLiter).toFixed(2));
+      const odometerReading = Math.max(0, vehicle.odometer - randInt(0, 20000) + randInt(0, 5000));
+
+      // Exact day with random hour
+      const logDate = new Date(now - day * 24 * 3600 * 1000);
+      logDate.setHours(randInt(6, 22), randInt(0, 59), 0, 0);
+
+      await prisma.fuelLog.create({
+        data: {
+          liters,
+          costPerLiter,
+          totalCost,
+          date: logDate,
+          odometerReading,
+          stationName: pick(FUEL_STATIONS),
+          vehicleId: vehicle.id,
+          driverId: driver ? driver.id : null,
+        },
+      });
+      fuelCount++;
+    }
+  }
+
+  // Older fuel logs (15-180 days ago)
+  for (let i = 0; i < 120; i++) {
     const vehicle = pick(activeVehicles);
     const driver = Math.random() > 0.15 ? pick(drivers.filter(d => d.status !== 'SUSPENDED')) : null;
-    const daysBack = randInt(0, 180);
+    const daysBack = randInt(15, 180);
 
-    // Fuel quantity based on vehicle type
     const liters = vehicle.type === 'TRUCK' ? randFloat(80, 300, 1)
       : vehicle.type === 'BUS' ? randFloat(60, 250, 1)
         : vehicle.type === 'VAN' ? randFloat(20, 80, 1)
           : vehicle.type === 'CAR' ? randFloat(15, 55, 1)
             : randFloat(3, 15, 1);
 
-    // Indian diesel/petrol prices (realistic range)
-    const costPerLiter = vehicle.type === 'MOTORCYCLE'
-      ? randFloat(96, 108, 2)  // Petrol
-      : randFloat(87, 98, 2);   // Diesel
-
+    const costPerLiter = vehicle.type === 'MOTORCYCLE' ? randFloat(96, 108, 2) : randFloat(87, 98, 2);
     const totalCost = parseFloat((liters * costPerLiter).toFixed(2));
-    const odometerReading = vehicle.odometer - randInt(0, 20000) + randInt(0, 5000);
 
-    const log = await prisma.fuelLog.create({
+    await prisma.fuelLog.create({
       data: {
         liters,
         costPerLiter,
         totalCost,
         date: daysAgo(daysBack),
-        odometerReading: Math.max(0, odometerReading),
+        odometerReading: Math.max(0, vehicle.odometer - randInt(0, 30000)),
         stationName: pick(FUEL_STATIONS),
         vehicleId: vehicle.id,
         driverId: driver ? driver.id : null,
       },
     });
-    fuelLogs.push(log);
+    fuelCount++;
   }
 
-  console.log(`  ✔ Created ${fuelLogs.length} fuel logs\n`);
+  console.log(`  ✔ Created ${fuelCount} fuel logs (every day in last 14 days covered)\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 7. EXPENSES (150 expenses — all categories over 6 months)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 7. EXPENSES (200 — ALL 6 categories with [Cat: X] prefix, spread across 14 days + older)
+  //    Categories: TOLL, MAINTENANCE, FUEL, SALARY, INSURANCE, OTHER
+  // ──────────────────────────────────────────────────────────────────────────
   console.log('[8/8] Seeding Expenses & Telemetry...');
 
-  const expenseCategories = ['TOLL', 'TOLL', 'TOLL', 'PARKING', 'REPAIR', 'INSURANCE', 'OTHER', 'OTHER'];
-  const expenses = [];
-  for (let i = 0; i < 150; i++) {
+  const frontendCategories = ['TOLL', 'MAINTENANCE', 'FUEL', 'SALARY', 'INSURANCE', 'OTHER'];
+  let expenseCount = 0;
+
+  // Ensure every day in the last 14 days has expenses from EVERY category
+  for (let day = 0; day < 14; day++) {
+    for (const cat of frontendCategories) {
+      const template = EXPENSE_TEMPLATES[cat];
+      const entriesPerCatPerDay = cat === 'INSURANCE' ? randInt(1, 2) : randInt(2, 5);
+
+      for (let j = 0; j < entriesPerCatPerDay; j++) {
+        const vehicle = pick(activeVehicles);
+        const desc = pick(template.descriptions);
+        const amount = randFloat(template.amountRange[0], template.amountRange[1], 0);
+
+        const expDate = new Date(now - day * 24 * 3600 * 1000);
+        expDate.setHours(randInt(6, 22), randInt(0, 59), 0, 0);
+
+        // Use [Cat: CATEGORY] prefix so dashboard parses it correctly
+        const dbDescription = `[Cat: ${cat}] ${desc}`;
+
+        await prisma.expense.create({
+          data: {
+            category: template.dbCategory,
+            description: dbDescription,
+            amount,
+            date: expDate,
+            vehicleId: vehicle.id,
+          },
+        });
+        expenseCount++;
+      }
+    }
+  }
+
+  // Older expenses (15-180 days ago)
+  for (let i = 0; i < 100; i++) {
+    const cat = pick(frontendCategories);
+    const template = EXPENSE_TEMPLATES[cat];
     const vehicle = pick(activeVehicles);
-    const category = pick(expenseCategories);
-    const daysBack = randInt(0, 180);
+    const daysBack = randInt(15, 180);
+    const desc = pick(template.descriptions);
+    const amount = randFloat(template.amountRange[0], template.amountRange[1], 0);
+    const dbDescription = `[Cat: ${cat}] ${desc}`;
 
-    // Expense amounts based on category
-    const amount = category === 'TOLL' ? randFloat(150, 4500, 0)
-      : category === 'PARKING' ? randFloat(100, 2000, 0)
-        : category === 'REPAIR' ? randFloat(500, 35000, 0)
-          : category === 'INSURANCE' ? randFloat(15000, 85000, 0)
-            : randFloat(200, 12000, 0);
-
-    const descPool = EXPENSE_DESCRIPTIONS[category];
-    const description = pick(descPool);
-
-    const expense = await prisma.expense.create({
+    await prisma.expense.create({
       data: {
-        category,
-        description,
+        category: template.dbCategory,
+        description: dbDescription,
         amount,
         date: daysAgo(daysBack),
         vehicleId: vehicle.id,
       },
     });
-    expenses.push(expense);
+    expenseCount++;
   }
 
-  console.log(`  ✔ Created ${expenses.length} expenses`);
+  console.log(`  ✔ Created ${expenseCount} expenses (all 6 categories: TOLL, MAINTENANCE, FUEL, SALARY, INSURANCE, OTHER)`);
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // 8. TELEMETRY LOGS (100 GPS points — multiple vehicles last 24 hours)
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // 8. TELEMETRY LOGS (GPS points for on-trip and parked vehicles)
+  // ──────────────────────────────────────────────────────────────────────────
   const onTripVehicles = vehicles.filter(v => v.status === 'ON_TRIP');
-  const telemetryLogs = [];
+  let telemetryCount = 0;
 
   for (const vehicle of onTripVehicles) {
-    // Find a trip associated with this vehicle that is active
     const matchingTrip = tripsData.find(
       t => t.vehicleId === vehicle.id && ['DISPATCHED', 'IN_PROGRESS'].includes(t.status)
     );
 
-    const baseLat = matchingTrip ? matchingTrip.sourceLat : (vehicle.currentLat || 28.6139);
-    const baseLng = matchingTrip ? matchingTrip.sourceLng : (vehicle.currentLng || 77.2090);
-    const destLat = matchingTrip ? matchingTrip.destLat : baseLat + 0.5;
-    const destLng = matchingTrip ? matchingTrip.destLng : baseLng + 0.5;
+    const baseLat = matchingTrip ? matchingTrip.sourceLat : (vehicle.currentLat || 23.0225);
+    const baseLng = matchingTrip ? matchingTrip.sourceLng : (vehicle.currentLng || 72.5714);
+    const destLat = matchingTrip ? matchingTrip.destLat : baseLat + 0.3;
+    const destLng = matchingTrip ? matchingTrip.destLng : baseLng + 0.3;
 
-    // Generate 15-20 telemetry points per vehicle over last 8 hours
     const pointCount = randInt(15, 20);
     for (let j = 0; j < pointCount; j++) {
       const progress = j / pointCount;
-      const lat = baseLat + (destLat - baseLat) * progress + randFloat(-0.01, 0.01);
-      const lng = baseLng + (destLng - baseLng) * progress + randFloat(-0.01, 0.01);
+      const lat = baseLat + (destLat - baseLat) * progress + randFloat(-0.005, 0.005);
+      const lng = baseLng + (destLng - baseLng) * progress + randFloat(-0.005, 0.005);
 
-      const log = await prisma.telemetryLog.create({
+      await prisma.telemetryLog.create({
         data: {
           latitude: parseFloat(lat.toFixed(6)),
           longitude: parseFloat(lng.toFixed(6)),
           speed: randFloat(0, 85, 1),
           heading: randFloat(0, 360, 1),
-          timestamp: new Date(now - (pointCount - j) * 30 * 60 * 1000), // every 30 mins
+          timestamp: new Date(now - (pointCount - j) * 30 * 60 * 1000),
           vehicleId: vehicle.id,
         },
       });
-      telemetryLogs.push(log);
+      telemetryCount++;
     }
   }
 
-  // Also add some telemetry for a few AVAILABLE vehicles (parked — zero speed)
-  const parkedVehicles = vehicles.filter(v => v.status === 'AVAILABLE').slice(0, 3);
+  // Parked vehicles
+  const parkedVehicles = vehicles.filter(v => v.status === 'AVAILABLE').slice(0, 4);
   for (const vehicle of parkedVehicles) {
     for (let j = 0; j < 5; j++) {
-      const log = await prisma.telemetryLog.create({
+      await prisma.telemetryLog.create({
         data: {
-          latitude: (vehicle.currentLat || 12.9716) + randFloat(-0.001, 0.001),
-          longitude: (vehicle.currentLng || 77.5946) + randFloat(-0.001, 0.001),
+          latitude: (vehicle.currentLat || 23.0225) + randFloat(-0.001, 0.001),
+          longitude: (vehicle.currentLng || 72.5714) + randFloat(-0.001, 0.001),
           speed: 0,
           heading: randFloat(0, 360, 1),
           timestamp: new Date(now - (5 - j) * 60 * 60 * 1000),
           vehicleId: vehicle.id,
         },
       });
-      telemetryLogs.push(log);
+      telemetryCount++;
     }
   }
 
-  console.log(`  ✔ Created ${telemetryLogs.length} telemetry GPS points\n`);
+  console.log(`  ✔ Created ${telemetryCount} telemetry GPS points\n`);
 
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
   // Summary
-  // ────────────────────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
   const totalRecords = users.length + vehicles.length + drivers.length
-    + tripsData.length + maintenanceLogs.length + fuelLogs.length
-    + expenses.length + telemetryLogs.length;
+    + tripsData.length + maintenanceCount + fuelCount + expenseCount + telemetryCount;
 
   console.log('╔══════════════════════════════════════════════════════════════╗');
   console.log('║                   SEEDING COMPLETE                         ║');
   console.log('╠══════════════════════════════════════════════════════════════╣');
   console.log(`║  Users             : ${String(users.length).padStart(5)}                               ║`);
-  console.log(`║  Vehicles          : ${String(vehicles.length).padStart(5)}                               ║`);
+  console.log(`║  Vehicles          : ${String(vehicles.length).padStart(5)}  (all Gujarat)              ║`);
   console.log(`║  Drivers           : ${String(drivers.length).padStart(5)}                               ║`);
-  console.log(`║  Trips             : ${String(tripsData.length).padStart(5)}                               ║`);
-  console.log(`║  Maintenance Logs  : ${String(maintenanceLogs.length).padStart(5)}                               ║`);
-  console.log(`║  Fuel Logs         : ${String(fuelLogs.length).padStart(5)}                               ║`);
-  console.log(`║  Expenses          : ${String(expenses.length).padStart(5)}                               ║`);
-  console.log(`║  Telemetry Points  : ${String(telemetryLogs.length).padStart(5)}                               ║`);
+  console.log(`║  Trips             : ${String(tripsData.length).padStart(5)}  (Gujarat routes)           ║`);
+  console.log(`║  Maintenance Logs  : ${String(maintenanceCount).padStart(5)}                               ║`);
+  console.log(`║  Fuel Logs         : ${String(fuelCount).padStart(5)}                               ║`);
+  console.log(`║  Expenses          : ${String(expenseCount).padStart(5)}  (all 6 categories)         ║`);
+  console.log(`║  Telemetry Points  : ${String(telemetryCount).padStart(5)}                               ║`);
   console.log('╠══════════════════════════════════════════════════════════════╣');
   console.log(`║  TOTAL RECORDS     : ${String(totalRecords).padStart(5)}                               ║`);
   console.log('╚══════════════════════════════════════════════════════════════╝');
-  console.log('\n🔑 Login credentials for all users: Password123!');
+  console.log('\n🔑 Login: Password123!  |  📍 All vehicles in Gujarat');
 }
 
 main()
