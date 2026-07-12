@@ -39,6 +39,7 @@ enum DriverStatus {
 enum TripStatus {
   DRAFT
   DISPATCHED
+  IN_PROGRESS
   COMPLETED
   CANCELLED
 }
@@ -105,6 +106,7 @@ model Driver {
   updatedAt       DateTime     @updatedAt
 
   trips           Trip[]
+  fuelLogs        FuelLog[]
 }
 
 model Trip {
@@ -117,6 +119,7 @@ model Trip {
   fuelConsumed    Float?
   revenue         Float?     @default(0)
   status          TripStatus @default(DRAFT)
+  isDelayed       Boolean    @default(false)
 
   // GPS coordinates for route simulation
   sourceLat       Float?
@@ -153,17 +156,22 @@ model MaintenanceLog {
 }
 
 model FuelLog {
-  id          String   @id @default(uuid())
-  liters      Float
-  cost        Float
-  date        DateTime
-  odometer    Float?
+  id              String   @id @default(uuid())
+  liters          Float
+  costPerLiter    Float    @default(0)
+  totalCost       Float    @default(0)
+  date            DateTime @default(now())
+  odometerReading Float    @default(0)
+  stationName     String?
 
-  vehicleId   String
-  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId       String
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  driverId        String?
+  driver          Driver?  @relation(fields: [driverId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Expense {

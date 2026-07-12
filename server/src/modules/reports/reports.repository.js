@@ -69,18 +69,27 @@ async function getTripPerformanceMetrics() {
 }
 
 async function getTopDriverSafetyScores(limit = 6) {
-  return await prisma.driver.findMany({
-    where: { status: { not: 'INACTIVE' } },
+  const drivers = await prisma.driver.findMany({
+    where: { status: { not: 'SUSPENDED' } },
     select: {
       id: true,
       name: true,
-      licenseNo: true,
+      licenseNumber: true,
       safetyScore: true,
       status: true
     },
     orderBy: { safetyScore: 'desc' },
     take: limit
   });
+  
+  return drivers.map(d => ({
+    id: d.id,
+    name: d.name,
+    licenseNumber: d.licenseNumber,
+    licenseNo: d.licenseNumber,
+    safetyScore: d.safetyScore,
+    status: d.status
+  }));
 }
 
 async function getDailyExpenseTrend(days = 14) {

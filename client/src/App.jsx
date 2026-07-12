@@ -39,14 +39,14 @@ function App() {
           <Route path="/auth/signup" element={!user ? <SignupPage /> : <Navigate to="/" />} />
           
           <Route path="/" element={user ? <AppLayout><DashboardOverview /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/vehicles" element={user ? <AppLayout><VehiclesPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/drivers" element={user ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/trips" element={user ? <AppLayout><TripsPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/tracking" element={user ? <AppLayout><TrackingPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/maintenance" element={user ? <AppLayout><MaintenancePage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/fuel" element={user ? <AppLayout><FuelPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/expenses" element={user ? <AppLayout><ExpensesPage /></AppLayout> : <Navigate to="/auth/login" />} />
-          <Route path="/reports" element={user ? <AppLayout><ReportsPage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/vehicles" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'].includes(user.role) ? <AppLayout><VehiclesPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/drivers" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER'].includes(user.role) ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/trips" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'].includes(user.role) ? <AppLayout><TripsPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/tracking" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'].includes(user.role) ? <AppLayout><TrackingPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/maintenance" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER'].includes(user.role) ? <AppLayout><MaintenancePage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/fuel" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER', 'FINANCIAL_ANALYST'].includes(user.role) ? <AppLayout><FuelPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/expenses" element={user && ['FLEET_MANAGER', 'FINANCIAL_ANALYST'].includes(user.role) ? <AppLayout><ExpensesPage /></AppLayout> : <Navigate to="/" />} />
+          <Route path="/reports" element={user && ['FLEET_MANAGER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'].includes(user.role) ? <AppLayout><ReportsPage /></AppLayout> : <Navigate to="/" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>

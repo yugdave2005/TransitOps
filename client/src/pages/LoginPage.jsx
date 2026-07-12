@@ -1,23 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/layout/Toast';
 import { Truck, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, Wrench, BarChart } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('fleet_mgr@transitops.com');
   const [password, setPassword] = useState('Password123!');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
+      showToast({
+        type: 'success',
+        title: 'Login Successful',
+        message: `Welcome back, ${user.name || 'User'}!`
+      });
     } catch (err) {
-      setError(err.response?.data?.error || 'Authentication failed. Please verify your email and password.');
+      const errMsg = err.response?.data?.error || 'Authentication failed. Please verify your email and password.';
+      showToast({
+        type: 'error',
+        title: 'Login Failed',
+        message: errMsg
+      });
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +89,7 @@ export default function LoginPage() {
             <p className="text-xs text-text-secondary mt-1">Enter your credentials to access the transport operations portal.</p>
           </div>
 
-          {error && (
-            <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3.5 rounded-sm flex items-start space-x-2">
-              <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

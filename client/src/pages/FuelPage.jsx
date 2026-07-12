@@ -5,7 +5,9 @@ import { useToast } from '../components/layout/Toast';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
-import { Fuel, Plus, Search, Truck, DollarSign, Gauge, Users } from 'lucide-react';
+import { formatINR, formatINRDecimal } from '../lib/format';
+import { fuelSchema, validate } from '../lib/validators';
+import { Fuel, Plus, Search, Truck, IndianRupee, Gauge, Users } from 'lucide-react';
 
 export default function FuelPage() {
   const { hasRole } = useAuth();
@@ -19,13 +21,14 @@ export default function FuelPage() {
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [form, setForm] = useState({
     vehicleId: '',
     driverId: '',
     liters: 150,
-    costPerLiter: 1.45,
+    costPerLiter: 94.72,
     odometerReading: 45200,
-    stationName: 'Expressway Highway Pump #4'
+    stationName: 'HP Expressway Pump #4'
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -81,6 +84,18 @@ export default function FuelPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
+
+    const { success, errors } = validate(fuelSchema, {
+      vehicleId: form.vehicleId,
+      driverId: form.driverId || 'self',
+      liters: Number(form.liters),
+      costPerLiter: Number(form.costPerLiter),
+      odometerReading: Number(form.odometerReading),
+      stationName: form.stationName,
+    });
+    if (!success) { setFieldErrors(errors); return; }
+
     setSubmitting(true);
     try {
       await api.post('/fuel', {
@@ -133,9 +148,9 @@ export default function FuelPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KpiCard title="Total Fill-Up Logs" value={metrics.totalLogs} icon={Fuel} borderLeft="border-l-status-orange" color="text-status-orange" />
-        <KpiCard title="Total Fuel Consumed" value={`${metrics.totalLiters.toLocaleString()} L`} icon={Gauge} borderLeft="border-l-status-blue" color="text-status-blue" />
-        <KpiCard title="Total Fuel Expenditure" value={`$${metrics.totalCost.toLocaleString()}`} icon={DollarSign} borderLeft="border-l-primary" color="text-primary" />
-        <KpiCard title="Average Cost / Liter" value={`$${metrics.avgCostPerLiter}`} icon={DollarSign} borderLeft="border-l-status-green" color="text-status-green" />
+        <KpiCard title="Total Fuel Consumed" value={`${metrics.totalLiters.toLocaleString('en-IN')} L`} icon={Gauge} borderLeft="border-l-status-blue" color="text-status-blue" />
+        <KpiCard title="Total Fuel Expenditure" value={formatINR(metrics.totalCost)} icon={IndianRupee} borderLeft="border-l-primary" color="text-primary" />
+        <KpiCard title="Avg Cost / Litre" value={formatINRDecimal(metrics.avgCostPerLiter)} icon={IndianRupee} borderLeft="border-l-status-green" color="text-status-green" />
       </div>
 
       {/* Search Bar */}
@@ -180,8 +195,8 @@ export default function FuelPage() {
                   <td className="py-2.5 px-4 font-semibold text-text-primary">{log.stationName}</td>
                   <td className="py-2.5 px-4">{log.driver?.name || 'Self-Service'}</td>
                   <td className="py-2.5 px-4 text-right font-mono font-bold text-status-blue">{log.liters} L</td>
-                  <td className="py-2.5 px-4 text-right font-mono">${log.costPerLiter}</td>
-                  <td className="py-2.5 px-4 text-right font-mono font-bold text-primary">${log.totalCost}</td>
+                  <td className="py-2.5 px-4 text-right font-mono">{formatINRDecimal(log.costPerLiter)}</td>
+                  <td className="py-2.5 px-4 text-right font-mono font-bold text-primary">{formatINR(log.totalCost)}</td>
                   <td className="py-2.5 px-4 text-right font-mono text-text-secondary">{log.odometerReading} km</td>
                   <td className="py-2.5 px-4 font-mono text-[11px] text-text-muted">{new Date(log.date).toLocaleDateString()}</td>
                 </tr>
@@ -255,7 +270,7 @@ export default function FuelPage() {
             </div>
 
             <div>
-              <label className="block font-semibold uppercase text-text-secondary mb-1">Cost Per Liter ($)</label>
+              <label className="block font-semibold uppercase text-text-secondary mb-1">Cost Per Litre (₹)</label>
               <input
                 type="number"
                 step="0.01"
@@ -284,7 +299,7 @@ export default function FuelPage() {
 
           <div className="bg-background-page p-3 border border-border rounded-sm flex items-center justify-between font-mono font-bold">
             <span className="text-text-secondary">Estimated Receipt Total:</span>
-            <span className="text-primary text-base">${Number((form.liters * form.costPerLiter).toFixed(2))}</span>
+            <span className="text-primary text-base">{formatINR(Number((form.liters * form.costPerLiter).toFixed(2)))}</span>
           </div>
 
           <div className="pt-4 border-t border-border flex justify-end space-x-2">

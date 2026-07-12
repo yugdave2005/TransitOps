@@ -6,7 +6,9 @@ import StatusBadge from '../components/common/StatusBadge';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
-import { DollarSign, Plus, Search, Filter, Truck, ShieldCheck, PieChart, FileText } from 'lucide-react';
+import { formatINR } from '../lib/format';
+import { expenseSchema, validate } from '../lib/validators';
+import { IndianRupee, Plus, Search, Filter, Truck, ShieldCheck, PieChart, FileText } from 'lucide-react';
 
 export default function ExpensesPage() {
   const { hasRole } = useAuth();
@@ -21,9 +23,10 @@ export default function ExpensesPage() {
   const [vehicles, setVehicles] = useState([]);
   const [trips, setTrips] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [form, setForm] = useState({
     category: 'TOLL',
-    amount: 85.50,
+    amount: 350,
     description: 'National Highway Toll Plaza (Vellore-Krishnagiri)',
     vehicleId: '',
     tripId: ''
@@ -80,6 +83,15 @@ export default function ExpensesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
+
+    const { success, errors } = validate(expenseSchema, {
+      category: form.category,
+      amount: Number(form.amount),
+      description: form.description,
+    });
+    if (!success) { setFieldErrors(errors); return; }
+
     setSubmitting(true);
     try {
       await api.post('/expenses', {
@@ -112,7 +124,7 @@ export default function ExpensesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-background-panel border border-border p-4 rounded-sm shadow-sm">
         <div>
           <h1 className="text-xl font-bold text-text-primary flex items-center space-x-2">
-            <DollarSign className="w-5 h-5 text-status-green" />
+            <IndianRupee className="w-5 h-5 text-status-green" />
             <span>Financial Ledger & Expense Accounting</span>
           </h1>
           <p className="text-xs text-text-secondary mt-0.5">
@@ -130,9 +142,9 @@ export default function ExpensesPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KpiCard title="Total Ledger Entries" value={metrics.totalExpenses} icon={FileText} borderLeft="border-l-primary" color="text-primary" />
-        <KpiCard title="Total Expenditure" value={`$${metrics.totalAmount.toLocaleString()}`} icon={DollarSign} borderLeft="border-l-status-green" color="text-status-green" />
-        <KpiCard title="Toll Costs" value={`$${(metrics.categoryTotals.TOLL || 0).toLocaleString()}`} icon={PieChart} borderLeft="border-l-status-orange" color="text-status-orange" />
-        <KpiCard title="Insurance & Salary" value={`$${((metrics.categoryTotals.INSURANCE || 0) + (metrics.categoryTotals.SALARY || 0)).toLocaleString()}`} icon={ShieldCheck} borderLeft="border-l-status-blue" color="text-status-blue" />
+        <KpiCard title="Total Expenditure" value={formatINR(metrics.totalAmount)} icon={IndianRupee} borderLeft="border-l-status-green" color="text-status-green" />
+        <KpiCard title="Toll Costs" value={formatINR(metrics.categoryTotals.TOLL || 0)} icon={PieChart} borderLeft="border-l-status-orange" color="text-status-orange" />
+        <KpiCard title="Insurance & Salary" value={formatINR((metrics.categoryTotals.INSURANCE || 0) + (metrics.categoryTotals.SALARY || 0))} icon={ShieldCheck} borderLeft="border-l-status-blue" color="text-status-blue" />
       </div>
 
       {/* Filter Bar */}
@@ -195,7 +207,7 @@ export default function ExpensesPage() {
                   <td className="py-2.5 px-4 font-semibold text-text-primary">{item.description}</td>
                   <td className="py-2.5 px-4 font-mono font-bold text-text-primary">{item.vehicle?.registrationNo || 'General Overhead'}</td>
                   <td className="py-2.5 px-4 font-mono text-status-blue">{item.trip?.tripCode || '—'}</td>
-                  <td className="py-2.5 px-4 text-right font-mono font-bold text-status-green text-sm">${item.amount}</td>
+                  <td className="py-2.5 px-4 text-right font-mono font-bold text-status-green text-sm">{formatINR(item.amount)}</td>
                   <td className="py-2.5 px-4 font-mono text-[11px] text-text-muted">{new Date(item.date).toLocaleDateString()}</td>
                 </tr>
               ))
@@ -227,7 +239,7 @@ export default function ExpensesPage() {
             </div>
 
             <div>
-              <label className="block font-semibold uppercase text-text-secondary mb-1">Voucher Amount ($)</label>
+              <label className="block font-semibold uppercase text-text-secondary mb-1">Voucher Amount (₹)</label>
               <input
                 type="number"
                 step="0.01"

@@ -2,10 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/layout/Toast';
 import StatusBadge from '../components/common/StatusBadge';
 import ViewToggle from '../components/common/ViewToggle';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
+import { formatINR } from '../lib/format';
+import { vehicleSchema, validate } from '../lib/validators';
 import { Truck, Plus, Search, Filter, AlertCircle, Trash2, MapPin, Gauge } from 'lucide-react';
 
 export default function VehiclesPage() {
@@ -33,6 +36,8 @@ export default function VehiclesPage() {
     region: 'North'
   });
   const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const { showToast } = useToast();
 
   const fetchVehicles = useCallback(async () => {
     try {
@@ -77,6 +82,19 @@ export default function VehiclesPage() {
   const handleCreateVehicle = async (e) => {
     e.preventDefault();
     setFormError('');
+    setFieldErrors({});
+
+    const { success, errors } = validate(vehicleSchema, {
+      registrationNo: formData.registrationNo.toUpperCase(),
+      name: formData.name,
+      type: formData.type,
+      maxLoadCapacity: Number(formData.maxLoadCapacity),
+      odometer: Number(formData.odometer),
+      region: formData.region,
+      status: formData.status,
+    });
+    if (!success) { setFieldErrors(errors); return; }
+
     try {
       await api.post('/vehicles', {
         ...formData,
@@ -95,9 +113,10 @@ export default function VehiclesPage() {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await api.patch(`/vehicles/${id}/status`, { status: newStatus });
+      showToast({ type: 'success', title: 'Status Updated', message: `Vehicle transitioned to ${newStatus}.` });
       fetchVehicles();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update status.');
+      showToast({ type: 'error', title: 'Update Failed', message: err.response?.data?.error || 'Failed to update status.' });
     }
   };
 
@@ -105,9 +124,10 @@ export default function VehiclesPage() {
     if (!window.confirm(`Are you sure you want to delete vehicle ${regNo}?`)) return;
     try {
       await api.delete(`/vehicles/${id}`);
+      showToast({ type: 'success', title: 'Vehicle Deleted', message: `${regNo} removed from fleet.` });
       fetchVehicles();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete vehicle.');
+      showToast({ type: 'error', title: 'Delete Failed', message: err.response?.data?.error || 'Failed to delete vehicle.' });
     }
   };
 

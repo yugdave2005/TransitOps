@@ -28,10 +28,10 @@ export function ToastProvider({ children }) {
       <div className="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 max-w-sm w-full pointer-events-none">
         {toasts.map((t) => {
           const config = {
-            success: { bg: 'bg-status-green/10 border-status-green', text: 'text-status-green', icon: CheckCircle2 },
-            error: { bg: 'bg-status-red/10 border-status-red', text: 'text-status-red', icon: AlertCircle },
-            warning: { bg: 'bg-status-orange/10 border-status-orange', text: 'text-status-orange', icon: AlertCircle },
-            info: { bg: 'bg-primary/10 border-primary', text: 'text-primary', icon: Info }
+            success: { bg: 'bg-[#EBFBF3] border-status-green', text: 'text-status-green', icon: CheckCircle2 },
+            error: { bg: 'bg-[#FDF2F0] border-status-red', text: 'text-status-red', icon: AlertCircle },
+            warning: { bg: 'bg-[#FEF6EE] border-status-orange', text: 'text-status-orange', icon: AlertCircle },
+            info: { bg: 'bg-[#F3EDF2] border-primary', text: 'text-primary', icon: Info }
           }[t.type] || { bg: 'bg-white border-border', text: 'text-text-primary', icon: Info };
 
           const Icon = config.icon;
@@ -39,7 +39,7 @@ export function ToastProvider({ children }) {
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto border rounded-sm p-3.5 shadow-lg bg-background-panel flex items-start space-x-3 transition-all transform animate-slideUp ${config.bg}`}
+              className={`pointer-events-auto border rounded-sm p-3.5 shadow-lg flex items-start space-x-3 transition-all transform animate-slideUp ${config.bg}`}
             >
               <Icon className={`w-5 h-5 flex-shrink-0 ${config.text} mt-0.5`} />
               <div className="flex-1 min-w-0">

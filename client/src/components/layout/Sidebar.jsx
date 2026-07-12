@@ -1,45 +1,40 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Users, MapPin, Wrench, BarChart2, Compass, ChevronLeft, ChevronRight, ShieldCheck, Fuel, DollarSign } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Truck, Users, MapPin, Wrench, BarChart2, Compass, ShieldCheck, Fuel, DollarSign } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { path: '/', label: 'Dashboard Overview', icon: Compass, exact: true },
-  { path: '/tracking', label: 'Live Fleet Map', icon: MapPin },
-  { path: '/vehicles', label: 'Vehicles Directory', icon: Truck },
-  { path: '/drivers', label: 'Driver Profiles', icon: Users },
-  { path: '/trips', label: 'Trip Dispatching', icon: ShieldCheck },
-  { path: '/maintenance', label: 'Shop Maintenance', icon: Wrench },
-  { path: '/fuel', label: 'Fuel Fill-Up Logs', icon: Fuel },
-  { path: '/expenses', label: 'Financial Ledger', icon: DollarSign },
-  { path: '/reports', label: 'Analytics & Reports', icon: BarChart2 }
+  { path: '/', label: 'Dashboard', icon: Compass, exact: true, roles: null },
+  { path: '/tracking', label: 'Live Fleet Map', icon: MapPin, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'] },
+  { path: '/vehicles', label: 'Vehicles', icon: Truck, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'] },
+  { path: '/drivers', label: 'Drivers', icon: Users, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER'] },
+  { path: '/trips', label: 'Trips', icon: ShieldCheck, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER'] },
+  { path: '/maintenance', label: 'Maintenance', icon: Wrench, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER'] },
+  { path: '/fuel', label: 'Fuel Logs', icon: Fuel, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER', 'DRIVER', 'FINANCIAL_ANALYST'] },
+  { path: '/expenses', label: 'Expenses', icon: DollarSign, roles: ['FLEET_MANAGER', 'FINANCIAL_ANALYST'] },
+  { path: '/reports', label: 'Reports', icon: BarChart2, roles: ['FLEET_MANAGER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'] }
 ];
 
-export default function Sidebar({ isCollapsed, onToggle }) {
+export default function Sidebar() {
+  const { user } = useAuth();
+
+  const allowedNavItems = NAV_ITEMS.filter(item => {
+    if (!item.roles) return true;
+    return item.roles.includes(user?.role);
+  });
+
   return (
-    <aside
-      className={`bg-background-panel border-r border-border transition-all duration-200 flex flex-col z-20 ${
-        isCollapsed ? 'w-16' : 'w-60'
-      }`}
-    >
-      {/* Sidebar Header / Module Title */}
-      <div className="h-12 border-b border-border px-3 flex items-center justify-between bg-background-page/50">
-        {!isCollapsed && (
-          <span className="text-xs font-bold uppercase tracking-wider text-text-secondary truncate pl-1">
-            ERP Modules
-          </span>
-        )}
-        <button
-          onClick={onToggle}
-          className="p-1.5 rounded-sm hover:bg-black/5 text-text-secondary mx-auto transition-colors"
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-        >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+    <aside className="w-56 bg-background-panel border-r border-border flex flex-col flex-shrink-0 h-full">
+      {/* Sidebar Header */}
+      <div className="h-11 border-b border-border px-4 flex items-center bg-background-page/50">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+          Navigation
+        </span>
       </div>
 
-      {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {NAV_ITEMS.map((item) => {
+      {/* Navigation Links — scrollable */}
+      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {allowedNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
@@ -47,31 +42,28 @@ export default function Sidebar({ isCollapsed, onToggle }) {
               to={item.path}
               end={item.exact}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-3 py-2.5 rounded-sm text-xs font-medium transition-colors ${
+                `flex items-center space-x-3 px-3 py-2 rounded text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary/10 text-primary font-bold border-l-4 border-l-primary'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-black/5 border-l-4 border-l-transparent'
+                    ? 'bg-primary/10 text-primary font-semibold border-l-[3px] border-l-primary'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.04] border-l-[3px] border-l-transparent'
                 }`
               }
-              title={isCollapsed ? item.label : undefined}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
-              {!isCollapsed && <span className="truncate">{item.label}</span>}
+              <span className="truncate">{item.label}</span>
             </NavLink>
           );
         })}
-      </div>
+      </nav>
 
-      {/* Footer System Status */}
-      {!isCollapsed && (
-        <div className="p-3 border-t border-border bg-background-page/50 text-[11px] text-text-muted font-mono">
-          <div className="flex items-center justify-between">
-            <span>System Status:</span>
-            <span className="text-status-green font-bold">ONLINE</span>
-          </div>
-          <div className="mt-0.5 truncate">DB: PostgreSQL 16</div>
+      {/* Footer */}
+      <div className="p-3 border-t border-border bg-background-page/50 text-[10px] text-text-muted font-mono">
+        <div className="flex items-center justify-between">
+          <span>Status:</span>
+          <span className="text-status-green font-bold">ONLINE</span>
         </div>
-      )}
+        <div className="mt-0.5 truncate">PostgreSQL 16 · Node.js</div>
+      </div>
     </aside>
   );
 }

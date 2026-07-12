@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/layout/Toast';
 import { Truck, Lock, Mail, User, Shield, ArrowRight } from 'lucide-react';
 
 export default function SignupPage() {
   const { register } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -12,18 +14,26 @@ export default function SignupPage() {
     password: '',
     role: 'FLEET_MANAGER'
   });
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
     try {
-      await register(formData);
+      await register(formData.name, formData.email, formData.password, formData.role);
+      showToast({
+        type: 'success',
+        title: 'Registration Successful',
+        message: `Welcome, ${formData.name}! Your workspace account has been created.`
+      });
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Check your input.');
+      const errMsg = err.response?.data?.error || 'Registration failed. Check your input.';
+      showToast({
+        type: 'error',
+        title: 'Registration Failed',
+        message: errMsg
+      });
     } finally {
       setIsLoading(false);
     }
@@ -39,13 +49,6 @@ export default function SignupPage() {
           <h1 className="text-xl font-bold text-text-primary">Create TransitOps Account</h1>
           <p className="text-xs text-text-secondary mt-1">Join the Transport Operations ERP platform workspace.</p>
         </div>
-
-        {error && (
-          <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3 rounded-sm flex items-start space-x-2">
-            <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -315,9 +315,11 @@ async function main() {
   await prisma.fuelLog.create({
     data: {
       liters: 140.5,
-      cost: 13250,
+      costPerLiter: 94.3,
+      totalCost: 13250,
       date: new Date(Date.now() - 5 * 24 * 3600 * 1000),
-      odometer: 44800,
+      odometerReading: 44800,
+      stationName: 'Highway Fuel Center',
       vehicleId: truck1.id
     }
   });
@@ -325,9 +327,11 @@ async function main() {
   await prisma.fuelLog.create({
     data: {
       liters: 95.0,
-      cost: 8960,
+      costPerLiter: 94.3,
+      totalCost: 8960,
       date: new Date(Date.now() - 2 * 24 * 3600 * 1000),
-      odometer: 89100,
+      odometerReading: 89100,
+      stationName: 'Metro Fuels',
       vehicleId: truck2.id
     }
   });

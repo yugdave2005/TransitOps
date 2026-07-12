@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/layout/Toast';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
+import { formatINR } from '../lib/format';
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, Legend
 } from 'recharts';
-import { BarChart2, Download, FileSpreadsheet, DollarSign, ShieldCheck, Activity, Filter, RefreshCw } from 'lucide-react';
+import { BarChart2, Download, FileSpreadsheet, IndianRupee, ShieldCheck, Activity, Filter, RefreshCw } from 'lucide-react';
 
 export default function ReportsPage() {
   const { hasRole } = useAuth();
@@ -43,7 +44,7 @@ export default function ReportsPage() {
     try {
       if (activeTab === 'COSTS') {
         const rows = [
-          ['Category', 'Amount ($)'],
+          ['Category', 'Amount (₹)'],
           ...costsData.breakdown.map(b => [b.category, b.amount]),
           ['TOTAL', costsData.totalCost]
         ];
@@ -152,7 +153,7 @@ export default function ReportsPage() {
               : 'border-transparent text-text-secondary hover:text-text-primary'
           }`}
         >
-          <DollarSign className="w-4 h-4" />
+          <IndianRupee className="w-4 h-4" />
           <span>Operational Expenditure & Fuel Ledger</span>
         </button>
 
@@ -174,7 +175,7 @@ export default function ReportsPage() {
         <div className="space-y-6 animate-fadeIn">
           {/* Cost KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <KpiCard title="Total Operating Cost" value={`$${costsData.totalCost.toLocaleString()}`} icon={DollarSign} borderLeft="border-l-primary" color="text-primary" />
+            <KpiCard title="Total Operating Cost" value={formatINR(costsData.totalCost)} icon={IndianRupee} borderLeft="border-l-primary" color="text-primary" />
             <KpiCard title="Top Expense Category" value={costsData.breakdown.reduce((max, c) => c.amount > max.amount ? c : max, costsData.breakdown[0] || { category: 'N/A', amount: 0 }).category} icon={BarChart2} borderLeft="border-l-status-orange" color="text-status-orange" />
             <KpiCard title="Tracked Categories" value={costsData.breakdown.length} icon={Activity} borderLeft="border-l-status-blue" color="text-status-blue" />
           </div>
@@ -184,7 +185,7 @@ export default function ReportsPage() {
             <div className="bg-background-panel border border-border p-4 rounded-sm shadow-sm">
               <h3 className="font-bold text-sm text-text-primary mb-4 flex items-center space-x-2 border-b border-border pb-2">
                 <Activity className="w-4 h-4 text-primary" />
-                <span>30-Day Cumulative Cost Trajectory ($)</span>
+                <span>30-Day Cumulative Cost Trajectory (₹)</span>
               </h3>
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -193,9 +194,9 @@ export default function ReportsPage() {
                     <YAxis tick={{ fontSize: 10 }} />
                     <RechartsTooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="fuel" name="Fuel Fill-Ups ($)" stroke="#007bff" strokeWidth={2.5} dot={false} />
-                    <Line type="monotone" dataKey="expenses" name="Other Ledgers ($)" stroke="#714B67" strokeWidth={2.5} dot={false} />
-                    <Line type="monotone" dataKey="total" name="Combined Daily ($)" stroke="#28a745" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                    <Line type="monotone" dataKey="fuel" name="Fuel Fill-Ups (₹)" stroke="#007bff" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="expenses" name="Other Ledgers (₹)" stroke="#714B67" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="total" name="Combined Daily (₹)" stroke="#28a745" strokeWidth={2} strokeDasharray="5 5" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -211,7 +212,7 @@ export default function ReportsPage() {
                   <thead className="border-b border-border text-text-secondary">
                     <tr>
                       <th className="py-2.5 px-4">Cost Center Category</th>
-                      <th className="py-2.5 px-4 text-right">Total Expenditure ($)</th>
+                      <th className="py-2.5 px-4 text-right">Total Expenditure (₹)</th>
                       <th className="py-2.5 px-4 text-right">% of Total</th>
                     </tr>
                   </thead>
@@ -224,7 +225,7 @@ export default function ReportsPage() {
                             <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: item.color || '#714B67' }}></span>
                             <span>{item.category}</span>
                           </td>
-                          <td className="py-2.5 px-4 text-right font-bold text-text-primary">${item.amount.toLocaleString()}</td>
+                          <td className="py-2.5 px-4 text-right font-bold text-text-primary">{formatINR(item.amount)}</td>
                           <td className="py-2.5 px-4 text-right text-text-secondary">{pct}%</td>
                         </tr>
                       );

@@ -7,7 +7,9 @@ import StatusBadge from '../components/common/StatusBadge';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
-import { Wrench, Plus, Search, Filter, Truck, DollarSign, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { formatINR } from '../lib/format';
+import { maintenanceSchema, validate } from '../lib/validators';
+import { Wrench, Plus, Search, Filter, Truck, IndianRupee, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 
 export default function MaintenancePage() {
   const { hasRole } = useAuth();
@@ -31,6 +33,7 @@ export default function MaintenancePage() {
     status: 'IN_PROGRESS'
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   const fetchLogsAndMetrics = useCallback(async () => {
@@ -87,6 +90,17 @@ export default function MaintenancePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
+
+    const { success, errors } = validate(maintenanceSchema, {
+      vehicleId: form.vehicleId,
+      title: form.title,
+      description: form.description,
+      cost: Number(form.cost),
+      priority: form.priority,
+    });
+    if (!success) { setFieldErrors(errors); return; }
+
     setSubmitting(true);
     try {
       await api.post('/maintenance', {
@@ -158,7 +172,7 @@ export default function MaintenancePage() {
         <KpiCard title="Active In Shop" value={metrics.inProgress} icon={Wrench} borderLeft="border-l-status-orange" color="text-status-orange" />
         <KpiCard title="Scheduled Repairs" value={metrics.scheduled} icon={Clock} borderLeft="border-l-status-blue" color="text-status-blue" />
         <KpiCard title="Completed Service" value={metrics.completed} icon={CheckCircle2} borderLeft="border-l-status-green" color="text-status-green" />
-        <KpiCard title="Total Shop Expenditure" value={`$${metrics.totalCost.toLocaleString()}`} icon={DollarSign} borderLeft="border-l-primary" color="text-primary" />
+        <KpiCard title="Total Shop Expenditure" value={formatINR(metrics.totalCost)} icon={IndianRupee} borderLeft="border-l-primary" color="text-primary" />
       </div>
 
       {/* Filter Bar */}
@@ -230,7 +244,7 @@ export default function MaintenancePage() {
                       {log.priority}
                     </span>
                   </td>
-                  <td className="py-2.5 px-4 text-right font-mono font-bold text-text-primary">${log.cost}</td>
+                  <td className="py-2.5 px-4 text-right font-mono font-bold text-text-primary">{formatINR(log.cost)}</td>
                   <td className="py-2.5 px-4">
                     <StatusBadge status={log.status} />
                   </td>
@@ -302,7 +316,7 @@ export default function MaintenancePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-semibold uppercase text-text-secondary mb-1">Estimated Cost ($)</label>
+              <label className="block font-semibold uppercase text-text-secondary mb-1">Estimated Cost (₹)</label>
               <input
                 type="number"
                 required
