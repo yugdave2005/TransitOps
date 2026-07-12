@@ -15,8 +15,10 @@ const trackingRoutes = require('./modules/tracking/tracking.route');
 const maintenanceRoutes = require('./modules/maintenance/maintenance.route');
 const fuelRoutes = require('./modules/fuel/fuel.route');
 const expenseRoutes = require('./modules/expenses/expense.route');
+const reportsRoutes = require('./modules/reports/reports.route');
 const { startStatusWorker } = require('./workers/status.worker');
 const { startTelemetryWorker } = require('./workers/telemetry.worker');
+const { startAnalyticsWorker } = require('./workers/analytics.worker');
 
 const app = express();
 const server = http.createServer(app);
@@ -37,6 +39,7 @@ app.use('/api/tracking', trackingRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/fuel', fuelRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Base Health Check
 app.get('/api/health', (req, res) => {
@@ -55,6 +58,7 @@ async function startServer() {
     setTimeout(() => {
       startStatusWorker();
       startTelemetryWorker();
+      startAnalyticsWorker();
     }, 1500);
 
     server.listen(config.port, () => {
