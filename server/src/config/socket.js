@@ -47,10 +47,7 @@ function initSocketServer(httpServer) {
 }
 
 function getIo() {
-  if (!io) {
-    throw new Error('Socket.io has not been initialized!');
-  }
-  return io;
+  return io || null;
 }
 
 function emitToAll(event, payload) {
@@ -62,5 +59,6 @@ function emitToAll(event, payload) {
 module.exports = {
   initSocketServer,
   getIo,
+  getIO: getIo,
   emitToAll
 };
