@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VehiclesPage from './pages/VehiclesPage';
 import DriversPage from './pages/DriversPage';
+import TripsPage from './pages/TripsPage';
 import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut } from 'lucide-react';
 
 function DashboardWelcome() {
@@ -70,6 +71,7 @@ function App() {
           <Route path="/" element={user ? <AppLayout><DashboardWelcome /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/vehicles" element={user ? <AppLayout><VehiclesPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/drivers" element={user ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/trips" element={user ? <AppLayout><TripsPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
