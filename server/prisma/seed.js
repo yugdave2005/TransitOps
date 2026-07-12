@@ -21,29 +21,29 @@ function daysAgo(days, fromDate = new Date()) {
   return new Date(fromDate.getTime() - days * 24 * 3600 * 1000);
 }
 
-// ─── Gujarat-Only Data Pools ────────────────────────────────────────────────────
+// ─── India-Wide Data Pools ──────────────────────────────────────────────────────
 
-const GUJARAT_CITIES = [
+const INDIA_CITIES = [
+  { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+  { name: 'Delhi', lat: 28.6139, lng: 77.2090 },
+  { name: 'Bangalore', lat: 12.9716, lng: 77.5946 },
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
+  { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
+  { name: 'Pune', lat: 18.5204, lng: 73.8567 },
   { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714 },
+  { name: 'Jaipur', lat: 26.9124, lng: 75.7873 },
+  { name: 'Lucknow', lat: 26.8467, lng: 80.9462 },
+  { name: 'Patna', lat: 25.5941, lng: 85.1376 },
+  { name: 'Bhopal', lat: 23.2599, lng: 77.4126 },
+  { name: 'Kochi', lat: 9.9312, lng: 76.2673 },
+  { name: 'Guwahati', lat: 26.1445, lng: 91.7362 },
+  { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185 },
+  { name: 'Bhubaneswar', lat: 20.2961, lng: 85.8245 },
+  { name: 'Chandigarh', lat: 30.7333, lng: 76.7794 },
+  { name: 'Ranchi', lat: 23.3441, lng: 85.3090 },
   { name: 'Surat', lat: 21.1702, lng: 72.8311 },
-  { name: 'Vadodara', lat: 22.3072, lng: 73.1812 },
-  { name: 'Rajkot', lat: 22.3039, lng: 70.8022 },
-  { name: 'Gandhinagar', lat: 23.2156, lng: 72.6369 },
-  { name: 'Bhavnagar', lat: 21.7645, lng: 72.1519 },
-  { name: 'Jamnagar', lat: 22.4707, lng: 70.0577 },
-  { name: 'Junagadh', lat: 21.5222, lng: 70.4579 },
-  { name: 'Anand', lat: 22.5645, lng: 72.9289 },
-  { name: 'Morbi', lat: 22.8173, lng: 70.8370 },
-  { name: 'Nadiad', lat: 22.6916, lng: 72.8634 },
-  { name: 'Mehsana', lat: 23.5880, lng: 72.3693 },
-  { name: 'Bharuch', lat: 21.6944, lng: 72.9958 },
-  { name: 'Porbandar', lat: 21.6417, lng: 69.6293 },
-  { name: 'Valsad', lat: 20.5992, lng: 72.9342 },
-  { name: 'Navsari', lat: 20.9467, lng: 72.9520 },
-  { name: 'Kutch (Bhuj)', lat: 23.2420, lng: 69.6669 },
-  { name: 'Surendranagar', lat: 22.7272, lng: 71.6480 },
-  { name: 'Dahod', lat: 22.8364, lng: 74.2545 },
-  { name: 'Palanpur', lat: 24.1725, lng: 72.4381 },
+  { name: 'Indore', lat: 22.7196, lng: 75.8577 }
 ];
 
 const LOCATION_SUFFIXES = [
@@ -200,10 +200,11 @@ const VEHICLE_NAMES = {
   ],
 };
 
-const GJ_RTOS = ['GJ-01', 'GJ-02', 'GJ-03', 'GJ-04', 'GJ-05', 'GJ-06',
-  'GJ-07', 'GJ-08', 'GJ-09', 'GJ-10', 'GJ-11', 'GJ-12',
-  'GJ-13', 'GJ-14', 'GJ-15', 'GJ-16', 'GJ-17', 'GJ-18',
-  'GJ-19', 'GJ-20', 'GJ-21', 'GJ-22', 'GJ-23', 'GJ-24', 'GJ-25', 'GJ-27'];
+const INDIA_RTOS = [
+  'MH-01', 'MH-02', 'DL-01', 'DL-02', 'KA-01', 'KA-03', 'TN-01', 'TN-03',
+  'GJ-01', 'GJ-02', 'RJ-14', 'UP-16', 'UP-32', 'WB-01', 'TS-09', 'AP-01',
+  'KL-07', 'AS-01', 'OD-02', 'HR-26', 'PB-02', 'MP-04', 'BR-01', 'JH-01'
+];
 
 const FIRST_NAMES = [
   'Rajesh', 'Vikram', 'Suresh', 'Manoj', 'Priya', 'Anita', 'Kiran',
@@ -315,7 +316,7 @@ async function main() {
   function generateRegNo() {
     let reg;
     do {
-      const rto = pick(GJ_RTOS);
+      const rto = pick(INDIA_RTOS);
       const letters = String.fromCharCode(65 + randInt(0, 25)) + String.fromCharCode(65 + randInt(0, 25));
       const num = String(randInt(1000, 9999));
       reg = `${rto}-${letters}-${num}`;
@@ -325,9 +326,10 @@ async function main() {
   }
 
   const vehicles = [];
+  const regions = ['North', 'South', 'West', 'East'];
   for (let i = 0; i < vehicleSpecs.length; i++) {
     const spec = vehicleSpecs[i];
-    const city = pick(GUJARAT_CITIES);
+    const city = pick(INDIA_CITIES);
     const status = pick(vehicleStatuses);
 
     const vehicle = await prisma.vehicle.create({
@@ -339,7 +341,7 @@ async function main() {
         odometer: randInt(spec.odomRange[0], spec.odomRange[1]),
         acquisitionCost: randInt(spec.costRange[0], spec.costRange[1]),
         status,
-        region: 'West',
+        region: pick(regions),
         currentLat: status !== 'RETIRED' ? city.lat + randFloat(-0.02, 0.02) : null,
         currentLng: status !== 'RETIRED' ? city.lng + randFloat(-0.02, 0.02) : null,
       },
@@ -348,7 +350,7 @@ async function main() {
   }
 
   const activeVehicles = vehicles.filter(v => v.status !== 'RETIRED');
-  console.log(`  ✔ Created ${vehicles.length} vehicles (${activeVehicles.length} active, all Gujarat)\n`);
+  console.log(`  ✔ Created ${vehicles.length} vehicles (${activeVehicles.length} active, all India)\n`);
 
   // ──────────────────────────────────────────────────────────────────────────
   // 3. DRIVERS (20 — Gujarati names)
@@ -430,8 +432,8 @@ async function main() {
   for (let i = 0; i < 120; i++) {
     let srcCity, destCity;
     do {
-      srcCity = pick(GUJARAT_CITIES);
-      destCity = pick(GUJARAT_CITIES);
+      srcCity = pick(INDIA_CITIES);
+      destCity = pick(INDIA_CITIES);
     } while (srcCity.name === destCity.name);
 
     const vehicle = pick(activeVehicles);

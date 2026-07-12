@@ -43,6 +43,13 @@ function initOrUpdateVehicleTelemetry(vehicle) {
     const jitterLat = (Math.random() - 0.5) * 0.05;
     const jitterLng = (Math.random() - 0.5) * 0.05;
 
+    const initialLat = vehicle.currentLat !== null && vehicle.currentLat !== undefined
+      ? vehicle.currentLat
+      : (startPt.lat + jitterLat);
+    const initialLng = vehicle.currentLng !== null && vehicle.currentLng !== undefined
+      ? vehicle.currentLng
+      : (startPt.lng + jitterLng);
+
     simulationState.set(vehicle.id, {
       vehicleId: vehicle.id,
       registrationNo: vehicle.registrationNo,
@@ -50,8 +57,8 @@ function initOrUpdateVehicleTelemetry(vehicle) {
       status: vehicle.status,
       routeKey: chosenRouteKey,
       waypointIdx: 0,
-      lat: startPt.lat + jitterLat,
-      lng: startPt.lng + jitterLng,
+      lat: initialLat,
+      lng: initialLng,
       speed: vehicle.status === 'ON_TRIP' ? Math.floor(45 + Math.random() * 35) : 0,
       fuel: Math.floor(65 + Math.random() * 35),
       heading: 90,
@@ -117,7 +124,7 @@ function stepVehicleMotion(state) {
 async function tickSimulation() {
   try {
     const vehicles = await prisma.vehicle.findMany({
-      select: { id: true, registrationNo: true, type: true, status: true, maxLoadCapacity: true }
+      select: { id: true, registrationNo: true, type: true, status: true, maxLoadCapacity: true, currentLat: true, currentLng: true }
     });
 
     const telemetryUpdates = [];
@@ -174,7 +181,7 @@ function stopSimulator() {
 
 async function getSnapshot() {
   const vehicles = await prisma.vehicle.findMany({
-    select: { id: true, registrationNo: true, type: true, status: true, maxLoadCapacity: true, odometer: true }
+    select: { id: true, registrationNo: true, type: true, status: true, maxLoadCapacity: true, odometer: true, currentLat: true, currentLng: true }
   });
 
   return vehicles.map(v => initOrUpdateVehicleTelemetry(v));
