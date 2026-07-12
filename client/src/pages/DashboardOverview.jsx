@@ -47,10 +47,16 @@ export default function DashboardOverview() {
     setDriverLoading(true);
     try {
       const [dRes, tRes] = await Promise.all([api.get('/drivers'), api.get('/trips')]);
-      const matchingDriver = dRes.data.drivers.find(d => d.name.toLowerCase() === user.name.toLowerCase());
+      
+      const cleanUserName = user.name ? user.name.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase() : '';
+      
+      const matchingDriver = dRes.data.drivers.find(d => 
+        d.name.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase() === cleanUserName
+      );
       if (matchingDriver) setDriverData(matchingDriver);
+      
       const activeTrip = tRes.data.trips.find(t =>
-        t.driver?.name.toLowerCase() === user.name.toLowerCase() &&
+        t.driver?.name?.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase() === cleanUserName &&
         ['DISPATCHED', 'IN_PROGRESS'].includes(t.status)
       );
       setDriverTrip(activeTrip || null);
