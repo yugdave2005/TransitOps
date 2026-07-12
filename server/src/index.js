@@ -11,7 +11,9 @@ const authRoutes = require('./modules/auth/auth.route');
 const vehicleRoutes = require('./modules/vehicles/vehicle.route');
 const driverRoutes = require('./modules/drivers/driver.route');
 const tripRoutes = require('./modules/trips/trip.route');
+const trackingRoutes = require('./modules/tracking/tracking.route');
 const { startStatusWorker } = require('./workers/status.worker');
+const { startTelemetryWorker } = require('./workers/telemetry.worker');
 
 const app = express();
 const server = http.createServer(app);
@@ -28,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/tracking', trackingRoutes);
 
 // Base Health Check
 app.get('/api/health', (req, res) => {
@@ -42,9 +45,10 @@ async function startServer() {
     // Connect RabbitMQ asynchronously without blocking HTTP server startup
     connectRabbitMQ();
 
-    // Start background status workers after AMQP handshake
+    // Start background workers after AMQP handshake
     setTimeout(() => {
       startStatusWorker();
+      startTelemetryWorker();
     }, 1500);
 
     server.listen(config.port, () => {

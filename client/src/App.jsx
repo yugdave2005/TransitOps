@@ -9,7 +9,8 @@ import SignupPage from './pages/SignupPage';
 import VehiclesPage from './pages/VehiclesPage';
 import DriversPage from './pages/DriversPage';
 import TripsPage from './pages/TripsPage';
-import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut } from 'lucide-react';
+import TrackingPage from './pages/TrackingPage';
+import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut, Navigation } from 'lucide-react';
 
 function DashboardWelcome() {
   const { user } = useAuth();
@@ -72,6 +73,7 @@ function App() {
           <Route path="/vehicles" element={user ? <AppLayout><VehiclesPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/drivers" element={user ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/trips" element={user ? <AppLayout><TripsPage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/tracking" element={user ? <AppLayout><TrackingPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
