@@ -22,10 +22,8 @@ async function getFleetStatusDistribution() {
 }
 
 async function getExpenseCategoryBreakdown() {
-  const grouped = await prisma.expense.groupBy({
-    by: ['category'],
-    _sum: { amount: true }
-  });
+  const expenseRepo = require('../expenses/expense.repository');
+  const metrics = await expenseRepo.getMetrics();
 
   const categories = ['TOLL', 'MAINTENANCE', 'FUEL', 'SALARY', 'INSURANCE', 'OTHER'];
   const colorMap = {
@@ -37,14 +35,11 @@ async function getExpenseCategoryBreakdown() {
     OTHER: '#6c757d'
   };
 
-  return categories.map(cat => {
-    const match = grouped.find(g => g.category === cat);
-    return {
-      category: cat,
-      amount: match ? (match._sum.amount || 0) : 0,
-      color: colorMap[cat]
-    };
-  });
+  return categories.map(cat => ({
+    category: cat,
+    amount: metrics.categoryTotals[cat] || 0,
+    color: colorMap[cat]
+  }));
 }
 
 async function getTripPerformanceMetrics() {

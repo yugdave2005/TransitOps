@@ -319,9 +319,8 @@ export default function DashboardOverview() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={fleetStatus.filter(f => f.count > 0)} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="count" nameKey="name"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
+                  <Pie data={fleetStatus.filter(f => f.count > 0)} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="count" nameKey="name">
+
                     {fleetStatus.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
                   <RechartsTooltip />

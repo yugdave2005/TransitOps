@@ -38,6 +38,10 @@ async function findAll(filters = {}) {
     if (catMatch) {
       category = catMatch[1];
       description = description.replace(catMatch[0], '');
+    } else {
+      // Fallback mapping for legacy DB categories
+      if (category === 'REPAIR') category = 'MAINTENANCE';
+      else if (category === 'PARKING') category = 'OTHER';
     }
 
     // Parse tripId e.g. [Trip: UUID]

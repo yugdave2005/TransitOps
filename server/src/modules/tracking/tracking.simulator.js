@@ -39,6 +39,10 @@ function initOrUpdateVehicleTelemetry(vehicle) {
     const chosenRouteKey = routeKeys[Math.floor(Math.random() * routeKeys.length)];
     const startPt = ROUTES[chosenRouteKey][0];
 
+    // Add a slight jitter (approx 0 - 5km) so vehicles at the depot don't perfectly overlap on map
+    const jitterLat = (Math.random() - 0.5) * 0.05;
+    const jitterLng = (Math.random() - 0.5) * 0.05;
+
     simulationState.set(vehicle.id, {
       vehicleId: vehicle.id,
       registrationNo: vehicle.registrationNo,
@@ -46,8 +50,8 @@ function initOrUpdateVehicleTelemetry(vehicle) {
       status: vehicle.status,
       routeKey: chosenRouteKey,
       waypointIdx: 0,
-      lat: startPt.lat,
-      lng: startPt.lng,
+      lat: startPt.lat + jitterLat,
+      lng: startPt.lng + jitterLng,
       speed: vehicle.status === 'ON_TRIP' ? Math.floor(45 + Math.random() * 35) : 0,
       fuel: Math.floor(65 + Math.random() * 35),
       heading: 90,
