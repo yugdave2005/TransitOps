@@ -42,3 +42,33 @@ export function formatINRShort(value) {
   if (num >= 1e3) return `₹${(num / 1e3).toFixed(1)}K`;
   return `₹${num.toLocaleString('en-IN')}`;
 }
+
+/**
+ * Translate technical errors (e.g., "is not a function", unique constraints) to user-friendly messages.
+ */
+export function getFriendlyErrorMessage(errorMsg, defaultMsg = 'An unexpected error occurred. Please try again.') {
+  if (!errorMsg || typeof errorMsg !== 'string') return defaultMsg;
+  
+  const lower = errorMsg.toLowerCase();
+  
+  if (
+    lower.includes('not a function') || 
+    lower.includes('is not defined') || 
+    lower.includes('null') || 
+    lower.includes('undefined') ||
+    lower.includes('prisma') ||
+    lower.includes('error handler')
+  ) {
+    return 'The server encountered an unexpected error. Our engineers have been notified. Please try again later.';
+  }
+  
+  if (lower.includes('conflict') || lower.includes('already exists') || lower.includes('p2002')) {
+    return 'A record with this information already exists in our system. Please check details.';
+  }
+  
+  if (lower.includes('network error') || lower.includes('failed to fetch') || lower.includes('econnrefused')) {
+    return 'Network connection issue. Please check your internet connection and try again.';
+  }
+
+  return errorMsg;
+}

@@ -8,6 +8,7 @@ import ViewToggle from '../components/common/ViewToggle';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
+import { getFriendlyErrorMessage } from '../lib/format';
 import { ShieldCheck, Plus, Search, Filter, Truck, Users, MapPin, Calendar, CheckCircle, AlertTriangle, Play, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function TripsPage() {
@@ -130,7 +131,13 @@ export default function TripsPage() {
       setIsDispatchModalOpen(false);
       fetchTripsAndMetrics();
     } catch (err) {
-      setDispatchError(err.response?.data?.error || 'Failed to dispatch trip.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      setDispatchError(friendlyMsg);
+      showToast({
+        type: 'error',
+        title: 'Dispatch Failed',
+        message: friendlyMsg
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -146,10 +153,11 @@ export default function TripsPage() {
       });
       fetchTripsAndMetrics();
     } catch (err) {
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
       showToast({
         type: 'error',
         title: 'Transition Failed',
-        message: err.response?.data?.error || 'Failed to update trip status.'
+        message: friendlyMsg
       });
     }
   };
@@ -381,12 +389,6 @@ export default function TripsPage() {
 
       {/* Dispatch Trip Modal */}
       <Modal isOpen={isDispatchModalOpen} onClose={() => setIsDispatchModalOpen(false)} title="Dispatch New Cargo Trip">
-        {dispatchError && (
-          <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3.5 rounded-sm mb-4 flex items-start space-x-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>{dispatchError}</span>
-          </div>
-        )}
 
         <form onSubmit={handleDispatchSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

@@ -208,7 +208,6 @@ export default function FuelPage() {
 
       {/* Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Log Fuel Fill-Up Receipt">
-        {error && <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3 rounded-sm mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

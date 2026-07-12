@@ -1,8 +1,30 @@
 const prisma = require('../../config/prisma');
 
+function mapStatusDbToFrontend(status) {
+  if (status === 'OPEN') return 'SCHEDULED';
+  if (status === 'CLOSED') return 'COMPLETED';
+  return status;
+}
+
+function mapStatusFrontendToDb(status) {
+  if (status === 'SCHEDULED') return 'OPEN';
+  if (status === 'COMPLETED' || status === 'CANCELLED') return 'CLOSED';
+  return status;
+}
+
+function mapLog(log) {
+  if (!log) return null;
+  return {
+    ...log,
+    status: mapStatusDbToFrontend(log.status)
+  };
+}
+
 async function findAll(filters = {}) {
   const where = {};
-  if (filters.status) where.status = filters.status;
+  if (filters.status) {
+    where.status = mapStatusFrontendToDb(filters.status);
+  }
   if (filters.vehicleId) where.vehicleId = filters.vehicleId;
   if (filters.priority) where.priority = filters.priority;
   if (filters.search) {
@@ -13,7 +35,7 @@ async function findAll(filters = {}) {
     ];
   }
 
-  return await prisma.maintenanceLog.findMany({
+  const logs = await prisma.maintenanceLog.findMany({
     where,
     include: {
       vehicle: {
@@ -22,45 +44,53 @@ async function findAll(filters = {}) {
     },
     orderBy: { createdAt: 'desc' }
   });
+
+  return logs.map(mapLog);
 }
 
 async function findById(id) {
-  return await prisma.maintenanceLog.findUnique({
+  const log = await prisma.maintenanceLog.findUnique({
     where: { id },
     include: {
       vehicle: true
     }
   });
+  return mapLog(log);
 }
 
 async function create(data) {
-  return await prisma.maintenanceLog.create({
-    data,
+  const log = await prisma.maintenanceLog.create({
+    data: {
+      ...data,
+      status: mapStatusFrontendToDb(data.status)
+    },
     include: {
       vehicle: true
     }
   });
+  return mapLog(log);
 }
 
 async function updateStatus(id, status, extraData = {}) {
-  return await prisma.maintenanceLog.update({
+  const log = await prisma.maintenanceLog.update({
     where: { id },
     data: {
-      status,
+      status: mapStatusFrontendToDb(status),
       ...extraData
     },
     include: {
       vehicle: true
     }
   });
+  return mapLog(log);
 }
 
 async function getMetrics() {
   const [total, scheduled, inProgress, completed, totalCostResult] = await Promise.all([
     prisma.maintenanceLog.count(),
-    prisma.maintenanceLog.count({ where: { status: 'SCHEDULED' } }),
+    prisma.maintenanceLog.count({ where: { status: 'OPEN' } }),
     prisma.maintenanceLog.count({ where: { status: 'IN_PROGRESS' } }),
-    prisma.maintenanceLog.count({ where: { status: 'COMPLETED' } }),
+    prisma.maintenanceLog.count({ where: { status: 'CLOSED' } }),
     prisma.maintenanceLog.aggregate({
       _sum: { cost: true }
     })

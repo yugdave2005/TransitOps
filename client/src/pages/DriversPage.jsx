@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/layout/Toast';
+import { getFriendlyErrorMessage } from '../lib/format';
 import StatusBadge from '../components/common/StatusBadge';
 import ViewToggle from '../components/common/ViewToggle';
 import Modal from '../components/common/Modal';
@@ -11,6 +13,7 @@ import { Users, Plus, Search, Filter, AlertTriangle, ShieldCheck, Trash2, Phone,
 export default function DriversPage() {
   const { hasRole } = useAuth();
   const { subscribe } = useSocket();
+  const { showToast } = useToast();
 
   const [drivers, setDrivers] = useState([]);
   const [metrics, setMetrics] = useState({ total: 0, available: 0, onTrip: 0, offDuty: 0, suspended: 0, expiredCount: 0 });
@@ -85,16 +88,20 @@ export default function DriversPage() {
       setFormData({ name: '', licenseNumber: '', licenseCategory: 'CE (Heavy Trailer)', licenseExpiry: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString().split('T')[0], contactNumber: '+91 ', safetyScore: 100, status: 'AVAILABLE' });
       fetchDrivers();
     } catch (err) {
-      setFormError(err.response?.data?.error || 'Failed to create driver.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      setFormError(friendlyMsg);
+      showToast({ type: 'error', title: 'Registry Failed', message: friendlyMsg });
     }
   };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
       await api.patch(`/drivers/${id}/status`, { status: newStatus });
+      showToast({ type: 'success', title: 'Status Updated', message: `Driver status changed to ${newStatus}.` });
       fetchDrivers();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update status.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      showToast({ type: 'error', title: 'Update Failed', message: friendlyMsg });
     }
   };
 
@@ -102,9 +109,11 @@ export default function DriversPage() {
     if (!window.confirm(`Are you sure you want to delete driver ${name}?`)) return;
     try {
       await api.delete(`/drivers/${id}`);
+      showToast({ type: 'success', title: 'Driver Deleted', message: `Driver ${name} has been removed.` });
       fetchDrivers();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete driver.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      showToast({ type: 'error', title: 'Delete Failed', message: friendlyMsg });
     }
   };
 
@@ -338,11 +347,6 @@ export default function DriversPage() {
 
       {/* Create Driver Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Register Driver Compliance Profile">
-        {formError && (
-          <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3 rounded-sm mb-4">
-            {formError}
-          </div>
-        )}
 
         <form onSubmit={handleCreateDriver} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

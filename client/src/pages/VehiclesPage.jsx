@@ -7,7 +7,7 @@ import StatusBadge from '../components/common/StatusBadge';
 import ViewToggle from '../components/common/ViewToggle';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
-import { formatINR } from '../lib/format';
+import { formatINR, getFriendlyErrorMessage } from '../lib/format';
 import { vehicleSchema, validate } from '../lib/validators';
 import { Truck, Plus, Search, Filter, AlertCircle, Trash2, MapPin, Gauge } from 'lucide-react';
 
@@ -106,7 +106,13 @@ export default function VehiclesPage() {
       setFormData({ registrationNo: '', name: '', type: 'TRUCK', maxLoadCapacity: 15000, odometer: 0, acquisitionCost: 2500000, status: 'AVAILABLE', region: 'North' });
       fetchVehicles();
     } catch (err) {
-      setFormError(err.response?.data?.error || 'Failed to create vehicle.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      setFormError(friendlyMsg);
+      showToast({
+        type: 'error',
+        title: 'Registry Failed',
+        message: friendlyMsg
+      });
     }
   };
 
@@ -116,7 +122,8 @@ export default function VehiclesPage() {
       showToast({ type: 'success', title: 'Status Updated', message: `Vehicle transitioned to ${newStatus}.` });
       fetchVehicles();
     } catch (err) {
-      showToast({ type: 'error', title: 'Update Failed', message: err.response?.data?.error || 'Failed to update status.' });
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      showToast({ type: 'error', title: 'Update Failed', message: friendlyMsg });
     }
   };
 
@@ -127,7 +134,8 @@ export default function VehiclesPage() {
       showToast({ type: 'success', title: 'Vehicle Deleted', message: `${regNo} removed from fleet.` });
       fetchVehicles();
     } catch (err) {
-      showToast({ type: 'error', title: 'Delete Failed', message: err.response?.data?.error || 'Failed to delete vehicle.' });
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      showToast({ type: 'error', title: 'Delete Failed', message: friendlyMsg });
     }
   };
 
@@ -346,11 +354,6 @@ export default function VehiclesPage() {
 
       {/* Create Vehicle Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Register New Vehicle Asset">
-        {formError && (
-          <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3 rounded-sm mb-4">
-            {formError}
-          </div>
-        )}
 
         <form onSubmit={handleCreateVehicle} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

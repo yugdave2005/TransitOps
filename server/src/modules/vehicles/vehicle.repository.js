@@ -82,6 +82,7 @@ async function getSummaryMetrics() {
 module.exports = {
   findAll,
   findById,
+  findVehicleById: findById,
   findByRegistration,
   findAvailableForDispatch,
   create,

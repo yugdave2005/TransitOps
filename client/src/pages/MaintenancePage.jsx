@@ -7,7 +7,7 @@ import StatusBadge from '../components/common/StatusBadge';
 import Modal from '../components/common/Modal';
 import KpiCard from '../components/common/KpiCard';
 import Button from '../components/common/Button';
-import { formatINR } from '../lib/format';
+import { formatINR, getFriendlyErrorMessage } from '../lib/format';
 import { maintenanceSchema, validate } from '../lib/validators';
 import { Wrench, Plus, Search, Filter, Truck, IndianRupee, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 
@@ -120,7 +120,13 @@ export default function MaintenancePage() {
       setIsModalOpen(false);
       fetchLogsAndMetrics();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to check into shop.');
+      const friendlyMsg = getFriendlyErrorMessage(err.response?.data?.error || err.message);
+      setError(friendlyMsg);
+      showToast({
+        type: 'error',
+        title: 'Maintenance Order Failed',
+        message: friendlyMsg
+      });
     } finally {
       setSubmitting(false);
     }
@@ -271,11 +277,6 @@ export default function MaintenancePage() {
 
       {/* Log Repair Order Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Check Vehicle Into Shop">
-        {error && (
-          <div className="bg-status-red/10 border border-status-red text-status-red text-xs p-3 rounded-sm mb-4">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
