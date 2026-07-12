@@ -8,6 +8,8 @@ const errorHandler = require('./middleware/errorHandler');
 
 // Route imports
 const authRoutes = require('./modules/auth/auth.route');
+const vehicleRoutes = require('./modules/vehicles/vehicle.route');
+const driverRoutes = require('./modules/drivers/driver.route');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +23,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/drivers', driverRoutes);
 
 // Base Health Check
 app.get('/api/health', (req, res) => {

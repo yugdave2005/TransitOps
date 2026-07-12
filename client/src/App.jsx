@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { useSocket } from './context/SocketContext';
+import VehiclesPage from './pages/VehiclesPage';
+import DriversPage from './pages/DriversPage';
 import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut } from 'lucide-react';
 
 // Basic Login Page (Odoo Styled)
@@ -203,6 +205,8 @@ function App() {
         <Route path="/auth/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
         
         <Route path="/" element={user ? <AppLayout><DashboardWelcome /></AppLayout> : <Navigate to="/auth/login" />} />
+        <Route path="/vehicles" element={user ? <AppLayout><VehiclesPage /></AppLayout> : <Navigate to="/auth/login" />} />
+        <Route path="/drivers" element={user ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/auth/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
