@@ -381,43 +381,144 @@ Draft ──→ Dispatched (Pending Start) ──→ In Progress (En Route) ─�
 
 ### 12. 🐇 RabbitMQ Message Broker Infrastructure
 
-<table>
-  <tr>
-    <td width="50%">
-      <img src="Photos/Screenshot 2026-07-12 163103.png" alt="RabbitMQ Overview" width="100%"/>
-    </td>
-    <td width="50%">
-      <img src="Photos/Screenshot 2026-07-12 163139.png" alt="RabbitMQ Queues" width="100%"/>
-    </td>
-  </tr>
-</table>
+TransitOps uses **RabbitMQ 3.13.7** (Erlang 26.2.5.16) as its asynchronous **AMQP 0-9-1** message broker to decouple domain events from side-effects, enabling non-blocking asset state transitions, GPS telemetry persistence, and real-time notification delivery.
 
-<table>
-  <tr>
-    <td width="50%">
-      <img src="Photos/Screenshot 2026-07-12 163112.png" alt="RabbitMQ Connections" width="100%"/>
-    </td>
-    <td width="50%">
-      <img src="Photos/Screenshot 2026-07-12 163127.png" alt="RabbitMQ Exchanges" width="100%"/>
-    </td>
-  </tr>
-</table>
+#### 📡 Broker Overview — Queued Messages & Global Counts
 
-**RabbitMQ 3.13.7** running on Erlang 26.2.5.16 with the `transitops.events` topic exchange.
+<p align="center">
+  <img src="Photos/Screenshot 2026-07-12 163103.png" alt="RabbitMQ Overview Dashboard" width="90%"/>
+</p>
 
-**10 AMQP Queues:**
-| Queue | Purpose |
+> The **Overview** panel shows the cluster health: queued messages over time (Ready vs Unacked), message publish/consume rates, and global infrastructure counts.
+
+| Metric | Value |
 |---|---|
-| `q.analytics.trip` | Trip analytics event processing |
-| `q.notification.alert` | Real-time notification dispatch |
-| `q.status.lock` | Vehicle status locking (maintenance interlock) |
-| `q.status.unlock` | Vehicle status unlocking on repair completion |
-| `q.status.vehicle_available` | Mark vehicle as available |
-| `q.status.vehicle_to_shop` | Transition vehicle to shop status |
-| `q.tracking.broadcast` | GPS telemetry broadcast to WebSocket |
-| `q.tracking.persist` | GPS telemetry persistence to database |
-| `telemetry.socket.worker` | Socket.io telemetry worker |
-| `trips.status.worker` | Trip status transition worker |
+| Connections | 1 (Node.js server) |
+| Channels | 1 (AMQP multiplexed channel) |
+| Exchanges | 8 (7 default + `transitops.events`) |
+| Queues | 10 (all domain-specific workers) |
+| Consumers | 2 (active message consumers) |
+| Node Memory | 164 MiB |
+| Disk Space | 947 GiB available |
+| CPU Cores | 12 |
+
+---
+
+#### 🔗 Connections — AMQP Client Sessions
+
+<p align="center">
+  <img src="Photos/Screenshot 2026-07-12 163112.png" alt="RabbitMQ Connections" width="90%"/>
+</p>
+
+> Shows the active AMQP connection from the **Express.js server** (`172.17.0.1:59118`) using the `AMQP 0-9-1` protocol. The connection is in a `running` state, confirming the server's event producer is connected to the broker.
+
+---
+
+#### 📺 Channels — Multiplexed Communication
+
+<p align="center">
+  <img src="Photos/Screenshot 2026-07-12 163120.png" alt="RabbitMQ Channels" width="90%"/>
+</p>
+
+> A single **multiplexed channel** handles all publish/subscribe operations. The channel state is `idle`, indicating no active message processing at the time of capture. All 10 queues are served through this single channel for optimal resource usage.
+
+---
+
+#### 🔀 Exchanges — Topic-Based Event Routing
+
+<p align="center">
+  <img src="Photos/Screenshot 2026-07-12 163127.png" alt="RabbitMQ Exchanges" width="90%"/>
+</p>
+
+> The custom **`transitops.events`** exchange (type: `topic`) routes domain events to specific queues based on routing key patterns. This is the heart of the event-driven architecture.
+
+| Exchange | Type | Purpose |
+|---|---|---|
+| `transitops.events` | **topic** | Custom exchange for all TransitOps domain events |
+| `amq.direct` | direct | Default direct routing |
+| `amq.fanout` | fanout | Broadcast to all bound queues |
+| `amq.topic` | topic | Default topic exchange |
+| `amq.headers` | headers | Header-based routing |
+
+**Routing Key Patterns:**
+```
+status.lock.*        → q.status.lock
+status.unlock.*      → q.status.unlock
+tracking.broadcast.* → q.tracking.broadcast
+tracking.persist.*   → q.tracking.persist
+notification.*       → q.notification.alert
+analytics.trip.*     → q.analytics.trip
+```
+
+---
+
+#### 📬 Queues & Streams — 10 Domain Worker Queues
+
+<p align="center">
+  <img src="Photos/Screenshot 2026-07-12 163139.png" alt="RabbitMQ Queues" width="90%"/>
+</p>
+
+> All 10 queues are `running` with durable storage (`D` flag). Messages flow from the `transitops.events` topic exchange to specific queues based on routing keys.
+
+| Queue | Type | Purpose | Domain |
+|---|---|---|---|
+| `q.analytics.trip` | classic | Processes trip completion events for KPI aggregation | 📈 Reports |
+| `q.notification.alert` | classic | Dispatches real-time alerts to connected WebSocket clients | 🔔 Notifications |
+| `q.status.lock` | classic | Locks vehicle status during trip dispatch (ON_TRIP) | 🚛 Vehicles |
+| `q.status.unlock` | classic | Unlocks vehicle status on trip completion (AVAILABLE) | 🚛 Vehicles |
+| `q.status.vehicle_available` | classic | Transitions vehicle back to AVAILABLE pool | 🚛 Vehicles |
+| `q.status.vehicle_to_shop` | classic | Moves vehicle to IN_SHOP for maintenance interlock | 🔧 Maintenance |
+| `q.tracking.broadcast` | classic | Broadcasts GPS coordinates to Socket.io rooms | 🗺️ Fleet Map |
+| `q.tracking.persist` | classic | Persists telemetry data points to PostgreSQL | 🗺️ Fleet Map |
+| `telemetry.socket.worker` | classic | Socket.io worker for high-frequency GPS data push | 🗺️ Fleet Map |
+| `trips.status.worker` | classic | Processes trip lifecycle transitions (Draft → Completed) | 📦 Trips |
+
+---
+
+#### 🔄 Event-Driven Message Flow
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        PRODUCERS (Express.js API)                        │
+│                                                                          │
+│  Trip Dispatch ──→ publish("status.lock.vehicle")                        │
+│  Trip Complete ──→ publish("status.unlock.vehicle")                      │
+│  GPS Simulator ──→ publish("tracking.broadcast.{vehicleId}")             │
+│  Repair Logged ──→ publish("status.vehicle_to_shop")                     │
+│  Repair Done   ──→ publish("status.vehicle_available")                   │
+└────────────────────────────┬─────────────────────────────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  transitops.    │
+                    │  events         │
+                    │  (Topic Exchange)│
+                    └────────┬────────┘
+                             │ routing keys
+        ┌────────────────────┼────────────────────────┐
+        │                    │                        │
+   ┌────▼─────┐      ┌──────▼──────┐         ┌───────▼───────┐
+   │ Status   │      │  Tracking   │         │ Notification  │
+   │ Workers  │      │  Workers    │         │ Workers       │
+   │          │      │             │         │               │
+   │ Lock/    │      │ Broadcast   │         │ Push alerts   │
+   │ Unlock   │      │ GPS to      │         │ via Socket.io │
+   │ vehicles │      │ Socket.io + │         │ to connected  │
+   │ & drivers│      │ persist to  │         │ clients       │
+   │          │      │ PostgreSQL  │         │               │
+   └────┬─────┘      └──────┬──────┘         └───────┬───────┘
+        │                   │                        │
+   ┌────▼─────┐      ┌──────▼──────┐         ┌───────▼───────┐
+   │PostgreSQL│      │ PostgreSQL  │         │  Socket.io    │
+   │ (Prisma) │      │ + Socket.io │         │  (WebSocket)  │
+   └──────────┘      └─────────────┘         └───────────────┘
+```
+
+**Why RabbitMQ?**
+- 🔄 **Decoupled Architecture** — API controllers publish events without waiting for side-effects
+- ⚡ **Non-Blocking** — Trip dispatch returns instantly; vehicle locking happens asynchronously
+- 🛡️ **Reliability** — Durable queues survive broker restarts; no messages are lost
+- 📊 **Scalability** — Workers can be horizontally scaled independently
+- 🔍 **Observability** — RabbitMQ Management UI (`localhost:15672`) provides real-time monitoring
 
 ---
 
