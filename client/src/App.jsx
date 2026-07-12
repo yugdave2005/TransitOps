@@ -10,7 +10,10 @@ import VehiclesPage from './pages/VehiclesPage';
 import DriversPage from './pages/DriversPage';
 import TripsPage from './pages/TripsPage';
 import TrackingPage from './pages/TrackingPage';
-import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut, Navigation } from 'lucide-react';
+import MaintenancePage from './pages/MaintenancePage';
+import FuelPage from './pages/FuelPage';
+import ExpensesPage from './pages/ExpensesPage';
+import { Truck, Users, MapPin, Wrench, Fuel, BarChart2, ShieldCheck, LogOut, Navigation, DollarSign } from 'lucide-react';
 
 function DashboardWelcome() {
   const { user } = useAuth();
@@ -74,6 +77,9 @@ function App() {
           <Route path="/drivers" element={user ? <AppLayout><DriversPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/trips" element={user ? <AppLayout><TripsPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="/tracking" element={user ? <AppLayout><TrackingPage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/maintenance" element={user ? <AppLayout><MaintenancePage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/fuel" element={user ? <AppLayout><FuelPage /></AppLayout> : <Navigate to="/auth/login" />} />
+          <Route path="/expenses" element={user ? <AppLayout><ExpensesPage /></AppLayout> : <Navigate to="/auth/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Users, MapPin, Wrench, BarChart2, Compass, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Truck, Users, MapPin, Wrench, BarChart2, Compass, ChevronLeft, ChevronRight, ShieldCheck, Fuel, DollarSign } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Dashboard Overview', icon: Compass, exact: true },
@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { path: '/drivers', label: 'Driver Profiles', icon: Users },
   { path: '/trips', label: 'Trip Dispatching', icon: ShieldCheck },
   { path: '/maintenance', label: 'Shop Maintenance', icon: Wrench },
+  { path: '/fuel', label: 'Fuel Fill-Up Logs', icon: Fuel },
+  { path: '/expenses', label: 'Financial Ledger', icon: DollarSign },
   { path: '/reports', label: 'Analytics & Reports', icon: BarChart2 }
 ];
 

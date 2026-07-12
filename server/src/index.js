@@ -12,6 +12,9 @@ const vehicleRoutes = require('./modules/vehicles/vehicle.route');
 const driverRoutes = require('./modules/drivers/driver.route');
 const tripRoutes = require('./modules/trips/trip.route');
 const trackingRoutes = require('./modules/tracking/tracking.route');
+const maintenanceRoutes = require('./modules/maintenance/maintenance.route');
+const fuelRoutes = require('./modules/fuel/fuel.route');
+const expenseRoutes = require('./modules/expenses/expense.route');
 const { startStatusWorker } = require('./workers/status.worker');
 const { startTelemetryWorker } = require('./workers/telemetry.worker');
 
@@ -31,6 +34,9 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/tracking', trackingRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/fuel', fuelRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 // Base Health Check
 app.get('/api/health', (req, res) => {
